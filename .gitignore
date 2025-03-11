@@ -2,3 +2,4 @@
 .streamlit/
 .env
 __pycache__/
+client_secret.json
