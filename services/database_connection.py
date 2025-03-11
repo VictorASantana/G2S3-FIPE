@@ -10,11 +10,37 @@ DB_CONFIG = {
     "port": st.secrets["DB_PORT"]
 }
 
-def init_connection():
-    return psycopg2.connect(**DB_CONFIG)
+def create_connection():
+    try:
+        conn = psycopg2.connect(
+            dbname=DB_CONFIG["dbname"],
+            user=DB_CONFIG["user"],
+            password=DB_CONFIG["password"],
+            host=DB_CONFIG["host"],
+            port=DB_CONFIG["port"]
+        )
+        return conn
+    except Exception as e:
+        st.error(f"Erro ao conectar com o banco de dados: {e}")
+        return None
+    
+def execute_query(query, params=None):
+    conn = create_connection()
+    if conn:
+        try:
+            cursor = conn.cursor()
+            cursor.execute(query, params)
+            conn.commit()  # Confirma a execução da query
+            return cursor
+        except Exception as e:
+            st.error(f"Erro ao executar a query: {e}")
+            return None
+        finally:
+            cursor.close()
+            conn.close()
 
 def table_exists(table_name):
-  conn = init_connection()
+  conn = create_connection()
   cur = conn.cursor()
   
   cur.execute("""
