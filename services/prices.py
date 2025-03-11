@@ -1,6 +1,6 @@
 import psycopg2
 import streamlit as st
-from services.database_connection import create_connection, table_exists
+from database_connection import create_connection, table_exists
 
 def create_prices_table():
     if not table_exists("prices"):
@@ -25,3 +25,13 @@ def create_prices_table():
         print("Tabela 'prices' criada com sucesso.")
     else: 
         print("Tabela 'prices' já existe.")
+
+def save_price(store_id, vehicle_id, price, collect_date):
+    conn = create_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO prices (store_id, vehicle_id, price, collect_date)
+        VALUES (%s, %s, %s, %s);
+    """, (store_id, vehicle_id, price, collect_date))
+    conn.commit()
+    conn.close()

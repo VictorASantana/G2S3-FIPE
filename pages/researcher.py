@@ -4,53 +4,13 @@ import streamlit as st
 import psycopg2
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'services')))
+
 from database_connection import create_connection
-
-def get_stores():
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, name FROM store;")
-    stores = cursor.fetchall()
-    conn.close()
-    return stores
-
-def get_brands():
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, name FROM brand;")
-    brands = cursor.fetchall()
-    conn.close()
-    return brands
-
-def get_models_by_brand(brand_id):
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, name FROM model WHERE brand_id = %s;", (brand_id,))
-    models = cursor.fetchall()
-    conn.close()
-    return models
-
-def get_vehicles_by_model(model_id):
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT id, fabrication_year, model_year, average_price
-        FROM vehicles
-        WHERE model_id = %s;
-    """, (model_id,))
-    vehicles = cursor.fetchall()
-    conn.close()
-    return vehicles
-
-def save_price(store_id, vehicle_id, price, collect_date):
-    conn = create_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO prices (store_id, vehicle_id, price, collect_date)
-        VALUES (%s, %s, %s, %s);
-    """, (store_id, vehicle_id, price, collect_date))
-    conn.commit()
-    conn.close()
+from brand import get_brands
+from prices import save_price
+from store import get_stores
+from model import get_models_by_brand
+from vehicles import get_vehicles_by_model
 
 def researcher_panel():
     st.title("Painel do Pesquisador")

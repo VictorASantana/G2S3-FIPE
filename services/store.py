@@ -1,4 +1,4 @@
-from services.database_connection import create_connection, table_exists
+from database_connection import create_connection, table_exists
 
 def create_store_table():
     if not table_exists("store"):
@@ -32,3 +32,10 @@ def create_store_table():
     else: 
         print("Tabela 'store' já existe.")
 
+def get_stores():
+    conn = create_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM store;")
+    stores = cursor.fetchall()
+    conn.close()
+    return stores

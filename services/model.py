@@ -1,4 +1,4 @@
-from services.database_connection import create_connection, table_exists
+from database_connection import create_connection, table_exists
 
 def create_model_table():
     if not table_exists("model"):
@@ -19,3 +19,10 @@ def create_model_table():
     else: 
         print("Tabela 'model' já existe.")
 
+def get_models_by_brand(brand_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM model WHERE brand_id = %s;", (brand_id,))
+    models = cursor.fetchall()
+    conn.close()
+    return models
