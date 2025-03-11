@@ -7,7 +7,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 's
 
 from database_connection import create_connection
 
-# Função para obter a lista de lojas
 def get_stores():
     conn = create_connection()
     cursor = conn.cursor()
