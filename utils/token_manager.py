@@ -57,3 +57,4 @@ class AuthTokenManager:
         algorithm="HS256",
     )
     return encoded
+  
