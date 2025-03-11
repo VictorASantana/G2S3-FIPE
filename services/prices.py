@@ -11,7 +11,7 @@ def create_prices_table():
             CREATE TABLE IF NOT EXISTS prices (
                 id SERIAL PRIMARY KEY,
                 vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE,
-                store_id INTEGER REFERENCES stores(id) ON DELETE CASCADE,
+                store_id INTEGER REFERENCES store(id) ON DELETE CASCADE,
                 price DECIMAL(10, 2) NOT NULL,
                 collect_date TIMESTAMP NOT NULL
             );
