@@ -2,11 +2,11 @@ import psycopg2
 import streamlit as st
 
 DB_CONFIG = {
-    "dbname": st.secrets["postgresql"]["DB_NAME"],
-    "user": st.secrets["postgresql"]["DB_USER"],
-    "password": st.secrets["postgresql"]["DB_PASSWORD"],
-    "host": st.secrets["postgresql"]["DB_HOST"],
-    "port": st.secrets["postgresql"]["DB_PORT"]
+    "dbname": st.secrets["DB_NAME"],
+    "user": st.secrets["DB_USER"],
+    "password": st.secrets["DB_PASSWORD"],
+    "host": st.secrets["DB_HOST"],
+    "port": st.secrets["DB_PORT"]
 }
 
 def create_connection():
