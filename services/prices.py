@@ -1,15 +1,12 @@
 import psycopg2
 import streamlit as st
-from database_connection import init_connection
+from services.database_connection import create_connection, table_exists
 
 def create_prices_table():
-    conn = init_connection()
-    if conn is None:
-        return
-
-    try:
+    if not table_exists("prices"):
+        conn = create_connection()
         cur = conn.cursor()
-        
+
         cur.execute("""
             CREATE TABLE IF NOT EXISTS prices (
                 id SERIAL PRIMARY KEY,
@@ -21,12 +18,10 @@ def create_prices_table():
         """)
         
         conn.commit()
-        
-        st.success("Tabela 'prices' criada com sucesso!")
-        
-    except psycopg2.Error as e:
-        st.error(f"Erro ao criar a tabela 'prices': {e}")
-    
-    finally:
+        conn.commit()
         cur.close()
         conn.close()
+        
+        print("Tabela 'prices' criada com sucesso.")
+    else: 
+        print("Tabela 'prices' já existe.")
