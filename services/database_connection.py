@@ -1,6 +1,6 @@
-
 import streamlit as st
 import psycopg2
+
 
 DB_CONFIG = {
     "dbname": st.secrets["DB_NAME"],
