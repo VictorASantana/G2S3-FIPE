@@ -1,5 +1,6 @@
-import psycopg2
 import streamlit as st
+import psycopg2
+
 
 DB_CONFIG = {
     "dbname": st.secrets["DB_NAME"],
@@ -37,3 +38,20 @@ def execute_query(query, params=None):
         finally:
             cursor.close()
             conn.close()
+
+def table_exists(table_name):
+  conn = create_connection()
+  cur = conn.cursor()
+  
+  cur.execute("""
+      SELECT EXISTS (
+          SELECT FROM information_schema.tables 
+          WHERE table_name = %s
+      );
+  """, (table_name,))
+  
+  exists = cur.fetchone()[0]
+  
+  cur.close()
+  conn.close()
+  return exists
