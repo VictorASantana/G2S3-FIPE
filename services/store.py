@@ -1,4 +1,5 @@
 from services.database_connection import create_connection, table_exists
+from services.user_register import get_all_user_ids
 
 def create_store_table():
     if not table_exists("store"):
@@ -31,24 +32,6 @@ def create_store_table():
         print("Tabela 'store' criada com sucesso.")
     else: 
         print("Tabela 'store' já existe.")
-
-def get_all_user_ids(): #MOVER PARA USERS!!!!
-    """Retorna uma lista com todos os IDs dos usuários."""
-    conn = create_connection()
-    cursor = conn.cursor()
-
-    try:
-        cursor.execute("SELECT id FROM users;")
-        user_ids = [row[0] for row in cursor.fetchall()]
-        return user_ids
-
-    except psycopg2.Error as e:
-        print(f"Erro ao buscar IDs dos usuários: {e}")
-        return []
-
-    finally:
-        cursor.close()
-        conn.close()
 
 def create_store(user_id, name, state='SP'):
     conn = create_connection()
