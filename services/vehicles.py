@@ -21,7 +21,6 @@ def create_vehicles_table():
     else: 
         print("Tabela 'vehicles' já existe.")         
 
-# CREATE - Adicionar um novo veículo
 def create_vehicle(model_id, fabrication_year, model_year, average_price):
     conn = create_connection()
     cur = conn.cursor()
@@ -37,7 +36,6 @@ def create_vehicle(model_id, fabrication_year, model_year, average_price):
     conn.close()
     return vehicle_id
 
-# READ -
 def get_vehicles(model_id):
     conn = create_connection()
     cur = conn.cursor()
@@ -49,3 +47,29 @@ def get_vehicles(model_id):
     cur.close()
     conn.close()
     return vehicles
+
+def update_vehicle(vehicle_id, model_id, fabrication_year, model_year):
+    conn = create_connection()
+    cur = conn.cursor()
+    
+    cur.execute("""
+        UPDATE vehicles 
+        SET model_id = %s, fabrication_year = %s, model_year = %s
+        WHERE id = %s;
+    """, (model_id, fabrication_year, model_year, vehicle_id))
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    return f"Veículo {vehicle_id} atualizado com sucesso."
+
+def delete_vehicle(vehicle_id):
+    conn = create_connection()
+    cur = conn.cursor()
+    
+    cur.execute("DELETE FROM vehicles WHERE id = %s;", (vehicle_id,))
+    conn.commit()
+    
+    cur.close()
+    conn.close()
+    return f"Veículo {vehicle_id} deletado com sucesso."

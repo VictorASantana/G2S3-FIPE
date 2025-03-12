@@ -43,3 +43,25 @@ def get_brands():
     cur.close()
     conn.close()
     return brands
+
+def update_brand(brand_id, new_name):
+    conn = create_connection()
+    cur = conn.cursor()
+    
+    cur.execute("UPDATE brand SET name = %s WHERE id = %s;", (new_name, brand_id))
+    conn.commit()
+    
+    cur.close()
+    conn.close()
+    return f"Marca {brand_id} atualizada para {new_name} com sucesso."
+
+def delete_brand(brand_id):
+    conn = create_connection()
+    cur = conn.cursor()
+    
+    cur.execute("DELETE FROM brand WHERE id = %s;", (brand_id,))
+    conn.commit()
+    
+    cur.close()
+    conn.close()
+    return f"Marca {brand_id} deletada com sucesso."

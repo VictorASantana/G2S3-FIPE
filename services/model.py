@@ -8,7 +8,7 @@ def create_model_table():
         cur.execute("""
             CREATE TABLE model (
                 id SERIAL PRIMARY KEY,
-                brand_id INT REFERENCES brand(id),
+                brand_id INT REFERENCES brand(id) ON DELETE CASCADE,
                 name TEXT UNIQUE NOT NULL
             );
         """)
@@ -37,3 +37,25 @@ def get_models(brand_id):
     cur.close()
     conn.close()
     return models
+
+def update_model(model_id, new_name):
+    conn = create_connection()
+    cur = conn.cursor()
+    
+    cur.execute("UPDATE model SET name = %s WHERE id = %s;", (new_name, model_id))
+    conn.commit()
+    
+    cur.close()
+    conn.close()
+    return f"Modelo {model_id} atualizado para {new_name} com sucesso."
+
+def delete_model(model_id):
+    conn = create_connection()
+    cur = conn.cursor()
+    
+    cur.execute("DELETE FROM model WHERE id = %s;", (model_id,))
+    conn.commit()
+    
+    cur.close()
+    conn.close()
+    return f"Modelo {model_id} deletado com sucesso."
