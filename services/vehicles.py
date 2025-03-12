@@ -11,7 +11,8 @@ def create_vehicles_table():
                 model_id INTEGER REFERENCES model(id) ON DELETE CASCADE,
                 fabrication_year INTEGER NOT NULL,
                 model_year INTEGER NOT NULL,
-                average_price DECIMAL(10,2)
+                average_price DECIMAL(10,2),
+                has_changes BOOLEAN DEFAULT FALSE
             );
         """)
         conn.commit()
@@ -86,3 +87,31 @@ def get_vehicles_by_model(model_id):
     vehicles = cursor.fetchall()
     conn.close()
     return vehicles      
+
+def update_vehicle_average_price():
+    conn = create_connection()
+    cur = conn.cursor()
+    
+    try:
+       
+        cur.execute("""
+            UPDATE vehicles
+            SET average_price = subquery.avg_price
+            FROM (
+                SELECT p.vehicle_id, AVG(p.price) AS avg_price
+                FROM prices p
+                WHERE p.vehicle_id IN (SELECT vehicle_id FROM price_changes)
+                GROUP BY p.vehicle_id
+            ) AS subquery
+            WHERE vehicles.id = subquery.vehicle_id;
+        """)
+
+        cur.execute("DELETE FROM price_changes;")
+
+        conn.commit()
+        print("Preço médio atualizado para os veículos alterados. Alterações resetadas.")
+    except Exception as e:
+        print(f"Erro ao atualizar preços médios: {e}")
+    finally:
+        cur.close()
+        conn.close()
