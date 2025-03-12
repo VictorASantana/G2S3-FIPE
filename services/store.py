@@ -1,5 +1,6 @@
 from services.database_connection import create_connection, table_exists
-from services.user_register import get_all_user_ids
+from services.user_register import get_all_user_info
+import psycopg2
 
 def create_store_table():
     if not table_exists("store"):
@@ -22,8 +23,9 @@ def create_store_table():
             CREATE TABLE store (
                 id SERIAL PRIMARY KEY,
                 user_id INT REFERENCES users(id),
-                name TEXT UNIQUE NOT NULL,
-                state store_state NOT NULL
+                name TEXT NOT NULL,
+                state store_state NOT NULL,
+                CNPJ TEXT UNIQUE NOT NULL
             );
         """)
         conn.commit()
@@ -41,21 +43,21 @@ def get_stores():
     conn.close()
     return stores
   
-def create_store(user_id, name, state='SP'):
+def create_store(user_id, name, state='AC', CNPJ='12.345.678/0001-95'):
     conn = create_connection()
     cursor = conn.cursor()
 
     create_store_table()  
 
     try:
-        cursor.execute("SELECT * FROM store WHERE name = %s;", (name,))
+        cursor.execute("SELECT * FROM store WHERE CNPJ = %s;", (CNPJ,))
         existing_store = cursor.fetchone()
 
         if not existing_store:
-            if user_id in get_all_user_ids():
+            if user_id in get_all_user_info(info="id"):
                 cursor.execute(
-                    "INSERT INTO store (user_id, name, state) VALUES (%s, %s, %s)",
-                    (user_id, name, state)
+                    "INSERT INTO store (user_id, name, state, CNPJ) VALUES (%s, %s, %s, %s)",
+                    (user_id, name, state, CNPJ)
                 )
                 conn.commit()
                 print("Loja inserida com sucesso!")
@@ -115,7 +117,7 @@ def update_store(store_id, user_id=None, name=None, state=None):
             updates = []
             values = []
 
-            if user_id:
+            if user_id and get_all_user_info(info="id"):
                 updates.append("user_id = %s")
                 values.append(user_id)
             if name:
