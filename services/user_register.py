@@ -31,18 +31,26 @@ def create_user_table():
     else: 
         print("Tabela 'users' já existe.")
 
-def get_all_user_ids(): #MOVER PARA USERS!!!!
-    """Retorna uma lista com todos os IDs dos usuários."""
+def get_all_user_info(info="id"): 
+    """Retorna uma lista com todos os "info" dos usuários."""
+    
+    info_list = ['id', 'user_name', 'email', 'role']
+    try:
+        idx = info_list.index(info) 
+    except ValueError:
+        print(f"'{info}' not found in the user table.")
+        return None
+
     conn = create_connection()
     cursor = conn.cursor()
 
     try:
-        cursor.execute("SELECT id FROM users;")
-        user_ids = [row[0] for row in cursor.fetchall()]
-        return user_ids
+        cursor.execute(f"SELECT {info} FROM users;")
+        user_info = [row[0] for row in cursor.fetchall()]
+        return user_info
 
     except psycopg2.Error as e:
-        print(f"Erro ao buscar IDs dos usuários: {e}")
+        print(f"Erro ao buscar {info} dos usuários: {e}")
         return []
 
     finally:
