@@ -111,7 +111,7 @@ class Authenticator:
     self.auth_token_manager.delete_token()
 
 def check_required_role(role):
-  if not st.session_state["user_info"]:
+  if "user_info" not in st.session_state or not st.session_state["user_info"]:
     st.error("Você precisa estar logado.")
     st.stop()
   
