@@ -42,7 +42,7 @@ def get_vehicles(model_id):
     conn = create_connection()
     cur = conn.cursor()
     cur.execute("""
-        SELECT id, fabrication_year, model_year 
+        SELECT id, model_year, average_price
         FROM vehicles WHERE model_id = %s ORDER BY model_year;
     """, (model_id,))
     vehicles = cur.fetchall()
