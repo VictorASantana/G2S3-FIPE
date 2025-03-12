@@ -3,6 +3,12 @@ from services.database_connection import create_connection, table_exists
 def create_model_table():
     if not table_exists("model"):
         conn = create_connection()
+        if conn is None:
+            print("Erro: Falha ao conectar ao banco de dados.")
+        else:
+            print("Conexão estabelecida com sucesso!")
+        if conn is None:
+            print("Erro ao conectar ao banco de dados. Tabela 'model' não foi criada.")
         cur = conn.cursor()
 
         cur.execute("""
@@ -17,7 +23,30 @@ def create_model_table():
         conn.close()
         print("Tabela 'model' criada com sucesso.")
     else: 
-        print("Tabela 'model' já existe.")
+        print("Tabela 'model' já existe. Verificando restrições...")
+
+        # Verifica se a restrição já está correta
+        conn = create_connection()
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT conname, confdeltype FROM pg_constraint 
+            WHERE conrelid = 'model'::regclass 
+            AND confrelid = 'brand'::regclass;
+        """)
+        constraint = cur.fetchone()
+
+        if constraint and constraint[1] != 'c':  # 'c' significa CASCADE
+            print("Atualizando restrição de chave estrangeira...")
+            cur.execute("ALTER TABLE model DROP CONSTRAINT model_brand_id_fkey;")
+            cur.execute("""
+                ALTER TABLE model ADD CONSTRAINT model_brand_id_fkey 
+                FOREIGN KEY (brand_id) REFERENCES brand(id) ON DELETE CASCADE;
+            """)
+            conn.commit()
+            print("Restrição atualizada para ON DELETE CASCADE.")
+
+        cur.close()
+        conn.close()  
 
 def create_model(brand_id, name):
     conn = create_connection()
