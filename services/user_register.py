@@ -49,6 +49,31 @@ def get_all_user_ids(): #MOVER PARA USERS!!!!
         cursor.close()
         conn.close()
 
+def get_all_users():
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    try: 
+        cursor.execute("SELECT * FROM users")
+        users = cursor.fetchall()
+        formatted_users = []
+        for user in users:
+            formatted_users.append({
+                "id": user[0],
+                "name": user[1],
+                "email": user[2],
+                "role": user[3]
+            })
+        return formatted_users
+
+    except psycopg2.Error as e:
+        print(f"Erro ao buscar usuários: {e}")
+        return None
+
+    finally:
+        cursor.close()
+        conn.close()
+
 def create_user(user_name, email, role='pesquisador'):
     conn = create_connection()
     cursor = conn.cursor()
@@ -105,6 +130,7 @@ def read_user(user_id):
         conn.close()
 
 def update_user(user_id, user_name=None, email=None, role=None):
+    print(user_name)
     conn = create_connection()
     cursor = conn.cursor()
 
