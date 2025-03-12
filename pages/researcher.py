@@ -1,16 +1,13 @@
-import sys
-import os
 import streamlit as st
-import psycopg2
+from services.database_connection import create_connection
+from services.brand import get_brands
+from services.prices import save_price
+from services.store import get_stores
+from services.model import get_models_by_brand
+from services.vehicles import get_vehicles_by_model
+from utils.auth import check_required_role
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'services')))
-
-from database_connection import create_connection
-from brand import get_brands
-from prices import save_price
-from store import get_stores
-from model import get_models_by_brand
-from vehicles import get_vehicles_by_model
+check_required_role('pesquisador')
 
 def researcher_panel():
     st.title("Painel do Pesquisador")

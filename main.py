@@ -3,16 +3,6 @@ import streamlit as st
 from dotenv import load_dotenv
 from utils.auth import Authenticator
 
-#Escondendo o menu lateral de acesso às páginas
-hide_pages_style = """
-    <style>
-        [data-testid="stSidebarNav"] {
-            display: none;
-        }
-    </style>
-"""
-st.markdown(hide_pages_style, unsafe_allow_html=True)
-
 load_dotenv()
 
 allowed_users = os.getenv("ALLOWED_USERS").split(",")
@@ -34,8 +24,8 @@ if st.session_state["connected"]:
       if st.button("Acessar Painel do Gestor", use_container_width=True):
         st.switch_page("pages/manager_page.py")
     elif st.session_state['user_info'].get('role') == 'pesquisador':
-      if st.button("Acessar Painel do Pesquisador"):
-        st.switch_page("pages/researcher_page.py")
+      if st.button("Acessar Painel do Pesquisador", use_container_width=True):
+        st.switch_page("pages/researcher.py")
   with logout:
     if st.button("Log out", use_container_width=True):
       authenticator.logout()
