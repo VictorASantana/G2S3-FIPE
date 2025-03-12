@@ -172,3 +172,38 @@ def delete_user(user_id):
     finally:
         cursor.close()
         conn.close()
+
+#  if not existing_user:
+#    cursor.execute("INSERT INTO users (google_id, email) VALUES (%s, %s)", (google_id, email))
+#    conn.commit()
+  
+#  cursor.close()
+#  conn.close()
+
+def get_user_by_email(email):
+    try: 
+        conn = create_connection()
+        cur = conn.cursor()
+
+        cur.execute(
+            "SELECT id, user_name, email, role FROM users WHERE email = %s;",
+            (email,)
+        )
+
+        user = cur.fetchone()
+
+        cur.close()
+        conn.close()
+
+        if user:
+            return {
+                'user_name': user[1],
+                'email': user[2],
+                'role': user[3]
+            }
+        else:
+            return None
+    
+    except psycopg2.Error as e:
+        print(f"Erro ao buscar usuário: {e}")
+        return None
