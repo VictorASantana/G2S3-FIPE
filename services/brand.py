@@ -1,6 +1,6 @@
 import psycopg2
 import streamlit as st
-from services.database_connection import create_connection, table_exists
+from database_connection import create_connection, table_exists
 
 def create_brand_table():
     if not table_exists("brand"):
@@ -22,3 +22,11 @@ def create_brand_table():
         print("Tabela 'brand' criada com sucesso.")
     else: 
         print("Tabela 'brand' já existe.")
+
+def get_brands():
+    conn = create_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM brand;")
+    brands = cursor.fetchall()
+    conn.close()
+    return brands

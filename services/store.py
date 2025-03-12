@@ -33,6 +33,14 @@ def create_store_table():
     else: 
         print("Tabela 'store' já existe.")
 
+def get_stores():
+    conn = create_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name FROM store;")
+    stores = cursor.fetchall()
+    conn.close()
+    return stores
+  
 def create_store(user_id, name, state='SP'):
     conn = create_connection()
     cursor = conn.cursor()
