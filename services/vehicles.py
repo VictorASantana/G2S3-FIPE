@@ -12,7 +12,6 @@ def create_vehicles_table():
                 fabrication_year INTEGER NOT NULL,
                 model_year INTEGER NOT NULL,
                 average_price DECIMAL(10,2),
-                has_changes BOOLEAN DEFAULT FALSE
             );
         """)
         conn.commit()
