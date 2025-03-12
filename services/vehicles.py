@@ -20,3 +20,32 @@ def create_vehicles_table():
         print("Tabela 'vehicles' criada com sucesso.")
     else: 
         print("Tabela 'vehicles' já existe.")         
+
+# CREATE - Adicionar um novo veículo
+def create_vehicle(model_id, fabrication_year, model_year, average_price):
+    conn = create_connection()
+    cur = conn.cursor()
+    
+    cur.execute("""
+        INSERT INTO vehicles (model_id, fabrication_year, model_year, average_price)
+        VALUES (%s, %s, %s, %s) RETURNING id;
+    """, (model_id, fabrication_year, model_year, average_price))
+    
+    vehicle_id = cur.fetchone()[0]
+    conn.commit()
+    cur.close()
+    conn.close()
+    return vehicle_id
+
+# READ -
+def get_vehicles(model_id):
+    conn = create_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id, fabrication_year, model_year 
+        FROM vehicles WHERE model_id = %s ORDER BY model_year;
+    """, (model_id,))
+    vehicles = cur.fetchall()
+    cur.close()
+    conn.close()
+    return vehicles

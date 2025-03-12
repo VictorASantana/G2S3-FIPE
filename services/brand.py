@@ -22,3 +22,24 @@ def create_brand_table():
         print("Tabela 'brand' criada com sucesso.")
     else: 
         print("Tabela 'brand' já existe.")
+
+def create_brand(name):
+    conn = create_connection()
+    cur = conn.cursor()
+    
+    cur.execute("INSERT INTO brand (name) VALUES (%s) RETURNING id;", (name,))
+    brand_id = cur.fetchone()[0]
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+    return brand_id
+
+def get_brands():
+    conn = create_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT id, name FROM brand ORDER BY name;")
+    brands = cur.fetchall()
+    cur.close()
+    conn.close()
+    return brands
