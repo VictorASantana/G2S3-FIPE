@@ -1,6 +1,6 @@
 import psycopg2
 import streamlit as st
-from services.database_connection import create_connection, table_exists
+from database_connection import create_connection, table_exists
 
 def create_brand_table():
     if not table_exists("brand"):
@@ -65,3 +65,4 @@ def delete_brand(brand_id):
     cur.close()
     conn.close()
     return f"Marca {brand_id} deletada com sucesso."
+

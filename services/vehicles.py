@@ -1,4 +1,4 @@
-from services.database_connection import create_connection, table_exists
+from database_connection import create_connection, table_exists
 
 def create_vehicles_table():
     if not table_exists("vehicles"):
@@ -73,3 +73,16 @@ def delete_vehicle(vehicle_id):
     cur.close()
     conn.close()
     return f"Veículo {vehicle_id} deletado com sucesso."
+
+
+def get_vehicles_by_model(model_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT id, fabrication_year, model_year, average_price
+        FROM vehicles
+        WHERE model_id = %s;
+    """, (model_id,))
+    vehicles = cursor.fetchall()
+    conn.close()
+    return vehicles      
