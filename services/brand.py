@@ -1,6 +1,4 @@
-import psycopg2
-import streamlit as st
-from database_connection import create_connection, table_exists
+from services.database_connection import create_connection, table_exists
 
 def create_brand_table():
     if not table_exists("brand"):

@@ -1,4 +1,4 @@
-from database_connection import create_connection, table_exists
+from services.database_connection import create_connection, table_exists
 
 def create_model_table():
     if not table_exists("model"):

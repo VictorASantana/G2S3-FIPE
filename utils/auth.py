@@ -3,6 +3,7 @@ import streamlit as st
 import google_auth_oauthlib.flow
 from googleapiclient.discovery import build
 from utils.token_manager import AuthTokenManager
+from services.user_register import get_user_by_email
 
 class Authenticator:
   def __init__(
@@ -64,9 +65,12 @@ class Authenticator:
     if token is not None:
       st.query_params.clear()
       st.session_state["connected"] = True
+      validate_user = get_user_by_email(token["email"])
       st.session_state["user_info"] = {
           "email": token["email"],
           "oauth_id": token["oauth_id"],
+          "name": validate_user["user_name"],
+          "role": validate_user["role"]
       }
       st.rerun()  # update session state
 
@@ -83,15 +87,19 @@ class Authenticator:
       user_info = oauth_service.userinfo().get().execute()
       oauth_id = user_info.get("id")
       email = user_info.get("email")
+      validate_user = get_user_by_email(email)
 
-      if email in self.allowed_users:
+      if email in self.allowed_users and validate_user:
         self.auth_token_manager.set_token(email, oauth_id)
         st.session_state["connected"] = True
         st.session_state["user_info"] = {
           "oauth_id": oauth_id,
           "email": email,
+          "name": validate_user["user_name"],
+          "role": validate_user["role"]
         }
         self.is_valid = True
+        
       else:
         st.toast(":red[access denied: Unauthorized user]")
         self.is_valid = False
@@ -101,3 +109,12 @@ class Authenticator:
     st.session_state["user_info"] = None
     st.session_state["connected"] = None
     self.auth_token_manager.delete_token()
+
+def check_required_role(role):
+  if not st.session_state["user_info"]:
+    st.error("Você precisa estar logado.")
+    st.stop()
+  
+  if st.session_state["user_info"].get("role") != role:
+    st.error("Acesso negado: você não tem permissão para acessar esta página.")
+    st.stop()

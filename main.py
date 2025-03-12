@@ -17,10 +17,15 @@ authenticator.check_auth()
 authenticator.login()
 
 if st.session_state["connected"]:
-  st.write(f"Bem vindo! {st.session_state['user_info'].get('email')}")
+  st.write(f"Bem vindo! {st.session_state['user_info'].get('name')}")
   home, logout = st.columns(2)
   with home:
-    st.write("Login Aceito")
+    if st.session_state['user_info'].get('role') == 'gestor':
+      if st.button("Acessar Painel do Gestor", use_container_width=True):
+        st.switch_page("pages/manager_page.py")
+    elif st.session_state['user_info'].get('role') == 'pesquisador':
+      if st.button("Acessar Painel do Pesquisador", use_container_width=True):
+        st.switch_page("pages/researcher.py")
   with logout:
     if st.button("Log out", use_container_width=True):
       authenticator.logout()
