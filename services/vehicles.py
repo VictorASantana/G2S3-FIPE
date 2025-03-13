@@ -134,6 +134,28 @@ def update_vehicle_average_price():
         cur.close()
         conn.close()
 
+def calculate_average_price():
+    conn = create_connection()
+    cur = conn.cursor()
+  
+    try:
+        cur.execute( """
+                SELECT p.vehicle_id, CAST(AVG(p.price) AS NUMERIC(10,2)) AS avg_price
+                FROM prices p
+                WHERE p.vehicle_id IN (SELECT vehicle_id FROM price_changes)
+                GROUP BY p.vehicle_id
+        """
+)
+        conn.commit()
+        results = cur.fetchall()
+    except Exception as e:
+        print(f"Erro ao calcular a média: {e}")
+        results = e 
+    finally:
+        cur.close()
+        conn.close()
+        return results 
+
 def get_avg_price(model_id, model_year): 
     """Retorna o preco medio a partir das informocoes de busca -> ("marca" "modelo" "veiculo")"""
     
