@@ -11,7 +11,7 @@ def create_vehicles_table():
                 model_id INTEGER REFERENCES model(id) ON DELETE CASCADE,
                 fabrication_year INTEGER NOT NULL,
                 model_year INTEGER NOT NULL,
-                average_price DECIMAL(10,2),
+                average_price DECIMAL(10,2)
             );
         """)
         conn.commit()
@@ -23,18 +23,36 @@ def create_vehicles_table():
 
 def create_vehicle(model_id, fabrication_year, model_year, average_price):
     conn = create_connection()
-    cur = conn.cursor()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT id FROM vehicles
+            WHERE model_id = %s
+            AND fabrication_year = %s
+            AND model_year = %s;
+        """, (model_id, fabrication_year, model_year))
+        
+        existing_vehicle = cursor.fetchone()
+
+        if existing_vehicle:
+            print("Erro: Já existe um veículo com esse ano de fabricação e modelo.")
+            return "Erro: Já existe um veículo com esse ano de fabricação e modelo."
+        
+        cursor.execute("""
+            INSERT INTO vehicles (model_id, fabrication_year, model_year, average_price)
+            VALUES (%s, %s, %s, %s);
+        """, (model_id, fabrication_year, model_year, average_price))
+        
+        conn.commit()
+        return "Veículo cadastrado com sucesso!"
+
+    except psycopg2.Error as e:
+        return f"Erro ao inserir veículo: {e}"
     
-    cur.execute("""
-        INSERT INTO vehicles (model_id, fabrication_year, model_year, average_price)
-        VALUES (%s, %s, %s, %s) RETURNING id;
-    """, (model_id, fabrication_year, model_year, average_price))
-    
-    vehicle_id = cur.fetchone()[0]
-    conn.commit()
-    cur.close()
-    conn.close()
-    return vehicle_id
+    finally:
+        cursor.close()
+        conn.close()
 
 def get_vehicles(model_id):
     conn = create_connection()
@@ -86,31 +104,3 @@ def get_vehicles_by_model(model_id):
     vehicles = cursor.fetchall()
     conn.close()
     return vehicles      
-
-def update_vehicle_average_price():
-    conn = create_connection()
-    cur = conn.cursor()
-    
-    try:
-       
-        cur.execute("""
-            UPDATE vehicles
-            SET average_price = subquery.avg_price
-            FROM (
-                SELECT p.vehicle_id, AVG(p.price) AS avg_price
-                FROM prices p
-                WHERE p.vehicle_id IN (SELECT vehicle_id FROM price_changes)
-                GROUP BY p.vehicle_id
-            ) AS subquery
-            WHERE vehicles.id = subquery.vehicle_id;
-        """)
-
-        cur.execute("DELETE FROM price_changes;")
-
-        conn.commit()
-        print("Preço médio atualizado para os veículos alterados. Alterações resetadas.")
-    except Exception as e:
-        print(f"Erro ao atualizar preços médios: {e}")
-    finally:
-        cur.close()
-        conn.close()
