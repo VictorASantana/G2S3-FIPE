@@ -66,11 +66,13 @@ class Authenticator:
       st.query_params.clear()
       st.session_state["connected"] = True
       validate_user = get_user_by_email(token["email"])
+      print("Dados do usuário:", validate_user)
       st.session_state["user_info"] = {
           "email": token["email"],
           "oauth_id": token["oauth_id"],
           "name": validate_user["user_name"],
-          "role": validate_user["role"]
+          "role": validate_user["role"],
+          "user_id": validate_user["user_id"]
       }
       st.rerun()  # update session state
 
@@ -118,3 +120,9 @@ def check_required_role(role):
   if st.session_state["user_info"].get("role") != role:
     st.error("Acesso negado: você não tem permissão para acessar esta página.")
     st.stop()
+
+def get_logged_in_user_id():
+    if "user_info" in st.session_state and st.session_state["user_info"]:
+        user_data = get_user_by_email(st.session_state["user_info"]["email"])
+        return user_data.get("user_id") if user_data else None
+    return None
