@@ -1,17 +1,63 @@
 import streamlit as st
+import psycopg2
 from utils.auth import check_required_role
-from services.user_register import get_all_users, update_user, delete_user, create_user
+from services.user_register import get_all_users, update_user, delete_user, create_user, get_all_researcher_info
 from services.brand import get_brands, create_brand, update_brand, delete_brand
 from services.model import get_models_by_brand, create_model, update_model, delete_model
 from services.vehicles import create_vehicle, get_vehicles_by_model, update_vehicle, delete_vehicle
+from services.store import create_store, update_store, delete_store, get_stores, get_all_stores_info
+import time
+import pandas as pd
 
 check_required_role('gestor')
 
+st.set_page_config(
+    page_title="Painel do Gestor",
+    layout="wide"
+)
+
+time.sleep(0.1) # small timeout ensure config is applied
+
+# initialize session_state variables
+if "states_tuple" not in st.session_state:
+    st.session_state["states_tuple"] = ('AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 
+                                        'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 
+                                        'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO')
+if "new_store_name" not in st.session_state:
+    st.session_state["new_store_name"] = None
+if "new_store_CNPJ" not in st.session_state:
+    st.session_state["new_store_CNPJ"] = "12.345.678/0001-95"
+if "new_store_state" not in st.session_state:
+    st.session_state["new_store_state"] = "AC"
+if "new_store_user_id" not in st.session_state:
+    st.session_state["new_store_user_id"] = None
+
+if "selected_store_id" not in st.session_state:
+    st.session_state["selected_store_id"] = None
+if "selected_store_name" not in st.session_state:
+    st.session_state["selected_store_name"] = None
+if "selected_store_CNPJ" not in st.session_state:
+    st.session_state["selected_store_CNPJ"] = "12.345.678/0001-95"
+if "selected_store_state" not in st.session_state:
+    st.session_state["selected_store_state"] = "AC"
+if "selected_store_user_id" not in st.session_state:
+    st.session_state["selected_store_user_id"] = None
+
+if "updated_store_user_id" not in st.session_state:
+    st.session_state["updated_store_user_id"] = None
+if "updated_store_name" not in st.session_state:
+    st.session_state["updated_store_name"] = None
+if "updated_store_state" not in st.session_state:
+    st.session_state["updated_store_state"] = None
+
 def gestor_panel():
     st.title("Painel do Gestor")
+    st.write(f"Bem vindo! {st.session_state['user_info'].get('name')}")
+
     if st.button("Voltar"):
       st.switch_page("main.py")
-    menu = ["Gerenciar Marcas", "Gerenciar Modelos", "Gerenciar Veículos", "Gerenciar Usuários"]
+    
+    menu = ["Gerenciar Marcas", "Gerenciar Modelos", "Gerenciar Veículos", "Gerenciar Usuários", "Gerenciar Lojas"]
     choice = st.sidebar.selectbox("Escolha uma opção", menu)
     
     if choice == "Gerenciar Marcas":
@@ -66,45 +112,49 @@ def gestor_panel():
                     st.success(f"Modelo '{selected_model}' excluído com sucesso!")
     
     elif choice == "Gerenciar Veículos":
-        st.header("Gerenciar Veículos")
+      st.header("Gerenciar Veículos")
+    
+      brands = get_brands()
+      brand_options = {b[1]: b[0] for b in brands}
+      selected_brand = st.selectbox("Selecione a marca", ["Selecione"] + list(brand_options.keys()))
+    
+      if selected_brand != "Selecione":
+          brand_id = brand_options[selected_brand]
+          models = get_models_by_brand(brand_id)
+          model_options = {m[1]: m[0] for m in models}
+          selected_model = st.selectbox("Selecione o modelo", ["Selecione"] + list(model_options.keys()))
         
-        brands = get_brands()
-        brand_options = {b[1]: b[0] for b in brands}
-        selected_brand = st.selectbox("Selecione a marca", ["Selecione"] + list(brand_options.keys()))
-        
-        if selected_brand != "Selecione":
-            brand_id = brand_options[selected_brand]
-            models = get_models_by_brand(brand_id)
-            model_options = {m[1]: m[0] for m in models}
-            selected_model = st.selectbox("Selecione o modelo", ["Selecione"] + list(model_options.keys()))
+          if selected_model != "Selecione":
+              model_id = model_options[selected_model]
             
-            if selected_model != "Selecione":
-                model_id = model_options[selected_model]
+              fabrication_year = st.number_input("Ano de Fabricação", min_value=1900, max_value=2100, step=1)
+              model_year = st.number_input("Ano do Modelo", min_value=1900, max_value=2100, step=1)
+              average_price = st.number_input("Preço Médio", min_value=0.0, format="%.2f")
+            
+              if st.button("Adicionar Veículo"):
+                  result = create_vehicle(model_id, fabrication_year, model_year, average_price)
                 
-                fabrication_year = st.number_input("Ano de Fabricação", min_value=1900, max_value=2100, step=1)
-                model_year = st.number_input("Ano do Modelo", min_value=1900, max_value=2100, step=1)
-                average_price = st.number_input("Preço Médio", min_value=0.0, format="%.2f")
+                  if "Erro" in result:
+                      st.error(result)
+                  else:
+                      st.success("Veículo cadastrado com sucesso!")
+            
+              vehicles = get_vehicles_by_model(model_id)
+              vehicle_options = {f"{v[1]}/{v[2]}": v[0] for v in vehicles}
+              selected_vehicle = st.selectbox("Selecione um veículo para editar", ["Selecione"] + list(vehicle_options.keys()))
+            
+              if selected_vehicle != "Selecione":
+                  vehicle_id = vehicle_options[selected_vehicle]
+                  new_fabrication_year = st.number_input("Novo Ano de Fabricação", min_value=1900, max_value=2026, step=1)
+                  new_model_year = st.number_input("Novo Ano do Modelo", min_value=1900, max_value=2026, step=1)
                 
-                if st.button("Adicionar Veículo"):
-                    create_vehicle(model_id, fabrication_year, model_year, average_price)
-                    st.success("Veículo cadastrado com sucesso!")
+                  if st.button("Atualizar Veículo"):
+                      update_vehicle(vehicle_id, model_id, new_fabrication_year, new_model_year)
+                      st.success("Veículo atualizado com sucesso!")
                 
-                vehicles = get_vehicles_by_model(model_id)
-                vehicle_options = {f"{v[1]}/{v[2]}": v[0] for v in vehicles}
-                selected_vehicle = st.selectbox("Selecione um veículo para editar", ["Selecione"] + list(vehicle_options.keys()))
-                
-                if selected_vehicle != "Selecione":
-                    vehicle_id = vehicle_options[selected_vehicle]
-                    new_fabrication_year = st.number_input("Novo Ano de Fabricação", min_value=1900, max_value=2026, step=1)
-                    new_model_year = st.number_input("Novo Ano do Modelo", min_value=1900, max_value=2026, step=1)
-                    
-                    if st.button("Atualizar Veículo"):
-                        update_vehicle(vehicle_id, model_id, new_fabrication_year, new_model_year)
-                        st.success("Veículo atualizado com sucesso!")
-                    
-                    if st.button("Excluir Veículo"):
-                        delete_vehicle(vehicle_id)
-                        st.success("Veículo excluído com sucesso!")
+                  if st.button("Excluir Veículo"):
+                      delete_vehicle(vehicle_id)
+                      st.success("Veículo excluído com sucesso!")
 
     elif choice == "Gerenciar Usuários":
       st.header("Gerenciar Usuários")
@@ -240,6 +290,118 @@ def gestor_panel():
               st.session_state.creating_user = False
               st.rerun() 
 
+    elif choice == "Gerenciar Lojas":
+      create_col, stores_col = st.columns(2)
+
+      with create_col: #Future improvement -> after clean go back to placeholder
+        st.title("Adicione uma loja")
+
+        st.session_state["new_store_name"] = st.text_input("Nome da loja", placeholder="Insira o nome da loja")
+        st.session_state["new_store_CNPJ"] = st.text_input("CNPJ", placeholder="Insira o CNPJ da loja")
+        st.session_state["new_store_state"] = st.selectbox("Estado", st.session_state["states_tuple"], placeholder="Selecione um estado")
+
+        available_researchers_id = get_all_researcher_info(info="id")
+        available_researchers_name = get_all_researcher_info(info="user_name")
+        new_store_user_name = st.selectbox("Pesquisadores disponíveis", available_researchers_name, placeholder="Selecione um pesquisador")
+        id_idx = available_researchers_name.index(new_store_user_name) 
+        st.session_state["new_store_user_id"] = available_researchers_id[id_idx]
+
+        confirm_creation_col, clear_creation_col = st.columns(2)
+        with confirm_creation_col:
+          if st.button("Adicionar loja", use_container_width=True):
+              create_store(st.session_state["new_store_user_id"], 
+                          st.session_state["new_store_name"], 
+                          st.session_state["new_store_state"], 
+                          st.session_state["new_store_CNPJ"])
+        with clear_creation_col:
+          if st.button("Limpar campos", use_container_width=True):
+              st.session_state["new_store_name"] = None
+              st.session_state["new_store_CNPJ"] = "12.345.678/0001-95"
+              st.session_state["new_store_state"] = "AC"
+              st.session_state["new_store_user_id"] = None
+              st.rerun()
+
+      with stores_col:
+        st.title("Selecione uma loja")
+        
+        #st.header("Selecione uma loja")
+        available_stores_ids = get_all_stores_info(info="id")
+        available_researchers_ids = get_all_stores_info(info="user_id")
+        available_stores_names = get_all_stores_info(info="name")
+        available_stores_state = get_all_stores_info(info="state")
+        available_stores_CNPJ = get_all_stores_info(info="CNPJ")
+        data = {
+            "Id": available_stores_ids,
+            "Id Pesquisador": available_researchers_ids,
+            "Nome": available_stores_names,
+            "Estado": available_stores_state,
+            "CNPJ": available_stores_CNPJ
+        }
+        df = pd.DataFrame(data)
+
+        stores_to_select = st.dataframe(
+            df,
+            use_container_width=True,
+            hide_index=True,
+            on_select="rerun",
+            selection_mode="single-row",
+            height=300
+        )
+
+        st.write("Loja selecionada")
+        selected_store = stores_to_select.selection.rows
+        filtered_df = df.iloc[selected_store]
+        st.dataframe(
+            filtered_df,
+            use_container_width=True,
+            hide_index=True,
+        )
+
+        if len(filtered_df)>0:
+            st.session_state["selected_store_id"] = filtered_df["Id"].values[0]
+            st.session_state["selected_store_user_id"] = filtered_df["Id Pesquisador"].values[0]
+            st.session_state["selected_store_name"] = filtered_df["Nome"].values[0]
+            st.session_state["selected_store_CNPJ"] = filtered_df["Estado"].values[0]
+            st.session_state["selected_store_state"] = filtered_df["Id"].values[0]
+
+
+        update_name_col, update_state_col, update_researcher_col = st.columns(3)
+        with update_name_col:
+            st.session_state["updated_store_name"] = st.text_input("Novo Nome da loja", placeholder="Insira o novo nome da loja")
+        with update_state_col:
+            st.session_state["updated_store_state"] = st.selectbox("Estado", st.session_state["states_tuple"], placeholder="Selecione um novo estado")
+        with update_researcher_col:
+            available_researchers_id = get_all_researcher_info(info="id")
+            available_researchers_name = get_all_researcher_info(info="user_name")
+            updated_store_user_name = st.selectbox("Pesquisadores disponíveis", available_researchers_name, placeholder="Selecione um pesquisador", key="updated_store_user_name")
+            id_idx = available_researchers_name.index(updated_store_user_name) 
+            st.session_state["updated_store_user_id"] = available_researchers_id[id_idx]
+
+        update_col, clear_update_col, delete_col = st.columns(3)
+        with update_col:
+            update_button = st.button("Atualizar informações", use_container_width=True)
+            if update_button and st.session_state["selected_store_id"] is not None:
+                update_store(int(st.session_state["selected_store_id"]),
+                            st.session_state["updated_store_user_id"], 
+                            st.session_state["updated_store_name"], 
+                            st.session_state["updated_store_state"]
+                )
+                st.rerun()
+            elif update_button:
+                st.write("Selecione uma loja!")
+
+        with clear_update_col:
+            cancel_update_button = st.button("Cancelar atualização", use_container_width=True, key="cancel_update_button")
+            if cancel_update_button:
+                st.rerun()  
+
+        with delete_col:
+            remove_store_button = st.button("Remover loja", use_container_width=True, key="remove_store_button")
+            if remove_store_button and st.session_state["selected_store_id"] is not None:
+                delete_store(int(st.session_state["selected_store_id"]))
+                st.rerun()
+            elif remove_store_button:
+                st.write("Selecione uma loja!")
+
 if __name__ == "__main__":
     gestor_panel()
-    
