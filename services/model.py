@@ -67,6 +67,15 @@ def get_models(brand_id):
     conn.close()
     return models
 
+def get_model_id_by_name(name):
+    conn = create_connection()
+    cur = conn.cursor()
+    cur.execute(f"SELECT id FROM model WHERE name = %s;", (name,))
+    model_id = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return model_id
+
 def update_model(model_id, new_name):
     conn = create_connection()
     cur = conn.cursor()

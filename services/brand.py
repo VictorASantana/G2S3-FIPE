@@ -42,6 +42,15 @@ def get_brands():
     conn.close()
     return brands
 
+def get_brand_id_by_name(name):
+    conn = create_connection()
+    cur = conn.cursor()
+    cur.execute(f"SELECT id FROM brand WHERE name = %s;", (name,))
+    brand_id = cur.fetchone()[0]
+    cur.close()
+    conn.close()
+    return brand_id
+
 def update_brand(brand_id, new_name):
     conn = create_connection()
     cur = conn.cursor()
