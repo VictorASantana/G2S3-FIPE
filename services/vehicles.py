@@ -1,3 +1,5 @@
+import psycopg2
+
 from services.database_connection import create_connection, table_exists
 
 def create_vehicles_table():
@@ -92,7 +94,6 @@ def delete_vehicle(vehicle_id):
     conn.close()
     return f"Veículo {vehicle_id} deletado com sucesso."
 
-
 def get_vehicles_by_model(model_id):
     conn = create_connection()
     cursor = conn.cursor()
@@ -104,3 +105,54 @@ def get_vehicles_by_model(model_id):
     vehicles = cursor.fetchall()
     conn.close()
     return vehicles      
+
+def update_vehicle_average_price():
+    conn = create_connection()
+    cur = conn.cursor()
+    
+    try:
+       
+        cur.execute("""
+            UPDATE vehicles
+            SET average_price = subquery.avg_price
+            FROM (
+                SELECT p.vehicle_id, AVG(p.price) AS avg_price
+                FROM prices p
+                WHERE p.vehicle_id IN (SELECT vehicle_id FROM price_changes)
+                GROUP BY p.vehicle_id
+            ) AS subquery
+            WHERE vehicles.id = subquery.vehicle_id;
+        """)
+
+        cur.execute("DELETE FROM price_changes;")
+
+        conn.commit()
+        print("Preço médio atualizado para os veículos alterados. Alterações resetadas.")
+    except Exception as e:
+        print(f"Erro ao atualizar preços médios: {e}")
+    finally:
+        cur.close()
+        conn.close()
+
+def get_avg_price(model_id, model_year): 
+    """Retorna o preco medio a partir das informocoes de busca -> ("marca" "modelo" "veiculo")"""
+    
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT average_price
+            FROM vehicles
+            WHERE model_id = %s AND model_year = %s;
+        """, (model_id, model_year))
+        avg_price = cursor.fetchone()[0]
+        return avg_price
+
+    except psycopg2.Error as e:
+        print(f"Erro ao buscar preço das vehicles: {e}")
+        return []
+
+    finally:
+        cursor.close()
+        conn.close()  
