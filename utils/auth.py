@@ -97,7 +97,7 @@ class Authenticator:
           "oauth_id": oauth_id,
           "email": email,
           "name": validate_user["user_name"],
-          "role": validate_user["role"]
+          "role": validate_user["role"],
           "user_id": validate_user["user_id"]
         }
         self.is_valid = True
