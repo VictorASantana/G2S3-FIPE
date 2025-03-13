@@ -155,5 +155,4 @@ def get_avg_price(model_id, model_year):
 
     finally:
         cursor.close()
-        conn.close()
-    return vehicles      
+        conn.close()  
