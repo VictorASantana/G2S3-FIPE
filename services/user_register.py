@@ -57,6 +57,32 @@ def get_all_user_info(info="id"):
         cursor.close()
         conn.close()
 
+def get_all_researcher_info(info="id"): 
+    """Retorna uma lista com todos os "info" dos pesquisadores."""
+    
+    info_list = ['id', 'user_name', 'email', 'role']
+    try:
+        idx = info_list.index(info) 
+    except ValueError:
+        print(f"'{info}' not found in the user table.")
+        return None
+
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(f"SELECT {info} FROM users WHERE role = 'pesquisador';")
+        user_info = [row[0] for row in cursor.fetchall()]
+        return user_info
+
+    except psycopg2.Error as e:
+        print(f"Erro ao buscar {info} dos usuários: {e}")
+        return []
+
+    finally:
+        cursor.close()
+        conn.close()
+
 def get_all_users():
     conn = create_connection()
     cursor = conn.cursor()
