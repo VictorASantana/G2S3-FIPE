@@ -24,7 +24,7 @@ if "states_tuple" not in st.session_state:
                                         'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 
                                         'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO')
 if "new_store_name" not in st.session_state:
-    st.session_state["new_store_name"] = None
+    st.session_state["new_store_name"] = ""
 if "new_store_CNPJ" not in st.session_state:
     st.session_state["new_store_CNPJ"] = "12.345.678/0001-95"
 if "new_store_state" not in st.session_state:
@@ -32,6 +32,8 @@ if "new_store_state" not in st.session_state:
 if "new_store_user_id" not in st.session_state:
     st.session_state["new_store_user_id"] = None
 
+if "stores_available" not in st.session_state:
+    st.session_state["stores_available"] = None
 if "selected_store_id" not in st.session_state:
     st.session_state["selected_store_id"] = None
 if "selected_store_name" not in st.session_state:
@@ -343,13 +345,18 @@ def gestor_panel():
         confirm_creation_col, clear_creation_col = st.columns(2)
         with confirm_creation_col:
           if st.button("Adicionar loja", use_container_width=True):
-              create_store(st.session_state["new_store_user_id"], 
-                          st.session_state["new_store_name"], 
-                          st.session_state["new_store_state"], 
-                          st.session_state["new_store_CNPJ"])
+            if st.session_state["new_store_name"] == "" or st.session_state["new_store_CNPJ"] == "":
+                st.error("Preencha todos os campos!")
+            else: 
+                create_store(st.session_state["new_store_user_id"], 
+                            st.session_state["new_store_name"], 
+                            st.session_state["new_store_state"], 
+                            st.session_state["new_store_CNPJ"])
+                time.sleep(1)
+                st.rerun()
         with clear_creation_col:
           if st.button("Limpar campos", use_container_width=True):
-              st.session_state["new_store_name"] = None
+              st.session_state["new_store_name"] = ""
               st.session_state["new_store_CNPJ"] = "12.345.678/0001-95"
               st.session_state["new_store_state"] = "AC"
               st.session_state["new_store_user_id"] = None
@@ -420,11 +427,13 @@ def gestor_panel():
         with update_col:
             update_button = st.button("Atualizar informações", use_container_width=True)
             if update_button and st.session_state["selected_store_id"] is not None:
+                print(st.session_state["selected_store_id"])
                 update_store(int(st.session_state["selected_store_id"]),
                             st.session_state["updated_store_user_id"], 
                             st.session_state["updated_store_name"], 
                             st.session_state["updated_store_state"]
                 )
+                time.sleep(1)
                 st.rerun()
             elif update_button:
                 st.write("Selecione uma loja!")
@@ -438,6 +447,8 @@ def gestor_panel():
             remove_store_button = st.button("Remover loja", use_container_width=True, key="remove_store_button")
             if remove_store_button and st.session_state["selected_store_id"] is not None:
                 delete_store(int(st.session_state["selected_store_id"]))
+                st.success("Loja excluída com sucesso!")
+                time.sleep(1)
                 st.rerun()
             elif remove_store_button:
                 st.write("Selecione uma loja!")

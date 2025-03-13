@@ -1,6 +1,7 @@
 from services.database_connection import create_connection, table_exists
 from services.user_register import get_all_user_info
 import psycopg2
+import streamlit as st
 
 def create_store_table():
     if not table_exists("store"):
@@ -86,10 +87,12 @@ def create_store(user_id, name, state='AC', CNPJ='12.345.678/0001-95'):
                     (user_id, name, state, CNPJ)
                 )
                 conn.commit()
+                st.success("Loja inserida com sucesso!")
                 print("Loja inserida com sucesso!")
             else: 
                 print("Pesquisador inválido! Selecione um id de pesquisador válido.")
         else:
+            st.error("Loja já existe no banco de dados.")
             print("Loja já existe no banco de dados.")
 
     except psycopg2.Error as e:
@@ -143,13 +146,13 @@ def update_store(store_id, user_id=None, name=None, state=None):
             updates = []
             values = []
 
-            if user_id:
+            if user_id != existing_store[1]:
                 updates.append("user_id = %s")
                 values.append(user_id)
-            if name:
+            if name != "" and name != existing_store[2]:
                 updates.append("name = %s")
                 values.append(name)
-            if state:
+            if state != existing_store[3]:
                 updates.append("state = %s")
                 values.append(state)
             
@@ -161,8 +164,10 @@ def update_store(store_id, user_id=None, name=None, state=None):
                 update_query = f"UPDATE store SET {', '.join(updates)} WHERE id = %s;"
                 cursor.execute(update_query, tuple(values))
                 conn.commit()
+                st.success(f"Loja atualizada com sucesso!")
                 print(f"Loja com ID {store_id} atualizado com sucesso!")
             else:
+                st.write(f"Nenhuma informação nova fornecida para atualização.")
                 print("Nenhuma informação nova fornecida para atualização.")
         else:
             print("Loja não existe no banco de dados.")
