@@ -66,7 +66,6 @@ class Authenticator:
       st.query_params.clear()
       st.session_state["connected"] = True
       validate_user = get_user_by_email(token["email"])
-      print("Dados do usuário:", validate_user)
       st.session_state["user_info"] = {
           "email": token["email"],
           "oauth_id": token["oauth_id"],
@@ -99,6 +98,7 @@ class Authenticator:
           "email": email,
           "name": validate_user["user_name"],
           "role": validate_user["role"]
+          "user_id": validate_user["user_id"]
         }
         self.is_valid = True
         
