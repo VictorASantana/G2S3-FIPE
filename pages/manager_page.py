@@ -273,6 +273,9 @@ def gestor_panel():
             if st.button("Excluir", key=f"delete_{row['id']}"):
               delete_user(row["id"])
               st.warning("Usuário excluído!")
+              time.sleep(1)
+              st.rerun()
+              
 
         if st.session_state.editing_user_id == row['id']:
           with st.form(f"form_edit_{row['id']}", clear_on_submit=False):
@@ -281,15 +284,18 @@ def gestor_panel():
             new_role = st.selectbox("Role", ["gestor", "pesquisador"])
             form_col1, form_col2 = st.columns(2)
             with form_col1:
-              if st.form_submit_button("Salvar", use_container_width=True):
-                update_user(row["id"], new_name, new_email, new_role)
-                st.success("Usuário atualizado!")
-                st.session_state.editing_user_id = None
-                st.rerun() 
+                if st.form_submit_button("Salvar", use_container_width=True):
+                    if new_name == "" or new_email == "":
+                        st.error("Preencha todos os campos!")
+                    else:
+                        update_user(row["id"], new_name, new_email, new_role)
+                    st.session_state.editing_user_id = None
+                    time.sleep(1)
+                    st.rerun() 
             with form_col2:
-              if st.form_submit_button("Cancelar", use_container_width=True):
-                st.session_state.editing_user_id = None
-                st.rerun() 
+                if st.form_submit_button("Cancelar", use_container_width=True):
+                    st.session_state.editing_user_id = None
+                    st.rerun() 
 
       st.divider()
 
@@ -304,11 +310,14 @@ def gestor_panel():
           new_role = st.selectbox("Role", ["pesquisador", "gestor"])
           form_col1, form_col2 = st.columns(2)
           with form_col1:
-            if st.form_submit_button("Criar", use_container_width=True):
-              create_user(new_name, new_email, new_role)
-              st.success("Usuário Criado com Sucesso!")
-              st.session_state.creating_user = False
-              st.rerun() 
+            if st.form_submit_button("Cadastrar", use_container_width=True):
+                if new_name == "" or new_email == "":
+                    st.error("Preencha todos os campos!")
+                else:
+                    create_user(new_name, new_email, new_role)
+                st.session_state.creating_user = False
+                time.sleep(1)
+                st.rerun() 
           with form_col2:
             if st.form_submit_button("Cancelar", use_container_width=True):
               st.session_state.creating_user = False
