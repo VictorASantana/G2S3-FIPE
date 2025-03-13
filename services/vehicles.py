@@ -13,7 +13,7 @@ def create_vehicles_table():
                 model_id INTEGER REFERENCES model(id) ON DELETE CASCADE,
                 fabrication_year INTEGER NOT NULL,
                 model_year INTEGER NOT NULL,
-                average_price DECIMAL(10,2),
+                average_price DECIMAL(10,2)
             );
         """)
         conn.commit()
@@ -25,18 +25,36 @@ def create_vehicles_table():
 
 def create_vehicle(model_id, fabrication_year, model_year, average_price):
     conn = create_connection()
-    cur = conn.cursor()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT id FROM vehicles
+            WHERE model_id = %s
+            AND fabrication_year = %s
+            AND model_year = %s;
+        """, (model_id, fabrication_year, model_year))
+        
+        existing_vehicle = cursor.fetchone()
+
+        if existing_vehicle:
+            print("Erro: Já existe um veículo com esse ano de fabricação e modelo.")
+            return "Erro: Já existe um veículo com esse ano de fabricação e modelo."
+        
+        cursor.execute("""
+            INSERT INTO vehicles (model_id, fabrication_year, model_year, average_price)
+            VALUES (%s, %s, %s, %s);
+        """, (model_id, fabrication_year, model_year, average_price))
+        
+        conn.commit()
+        return "Veículo cadastrado com sucesso!"
+
+    except psycopg2.Error as e:
+        return f"Erro ao inserir veículo: {e}"
     
-    cur.execute("""
-        INSERT INTO vehicles (model_id, fabrication_year, model_year, average_price)
-        VALUES (%s, %s, %s, %s) RETURNING id;
-    """, (model_id, fabrication_year, model_year, average_price))
-    
-    vehicle_id = cur.fetchone()[0]
-    conn.commit()
-    cur.close()
-    conn.close()
-    return vehicle_id
+    finally:
+        cursor.close()
+        conn.close()
 
 def get_vehicles(model_id):
     conn = create_connection()
@@ -138,3 +156,4 @@ def get_avg_price(model_id, model_year):
     finally:
         cursor.close()
         conn.close()
+    return vehicles      
