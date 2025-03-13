@@ -1,3 +1,4 @@
+import streamlit as st
 import psycopg2
 from services.database_connection import create_connection, table_exists
 
@@ -124,8 +125,10 @@ def create_user(user_name, email, role='pesquisador'):
                 (user_name, email, role)
             )
             conn.commit()
+            st.success("Usuário cadastrado com Sucesso!")
             print("Usuário inserido com sucesso!")
         else:
+            st.error("Usuário já cadastrado!")
             print("Usuário já existe no banco de dados.")
 
     except psycopg2.Error as e:
@@ -164,7 +167,6 @@ def read_user(user_id):
         conn.close()
 
 def update_user(user_id, user_name=None, email=None, role=None):
-    print(user_name)
     conn = create_connection()
     cursor = conn.cursor()
 
@@ -196,6 +198,7 @@ def update_user(user_id, user_name=None, email=None, role=None):
                 update_query = f"UPDATE users SET {', '.join(updates)} WHERE id = %s;"
                 cursor.execute(update_query, tuple(values))
                 conn.commit()
+                st.success("Usuário atualizado!")
                 print(f"Usuário com ID {user_id} atualizado com sucesso!")
             else:
                 print("Nenhuma informação nova fornecida para atualização.")
@@ -203,6 +206,7 @@ def update_user(user_id, user_name=None, email=None, role=None):
             print("Usuário não existe no banco de dados.")
 
     except psycopg2.Error as e:
+        st.error("Usuário já existe!")
         print(f"Erro ao ler usuário:\n{e}")
     
     finally:
@@ -257,6 +261,7 @@ def get_user_by_email(email):
 
         if user:
             return {
+                'user_id': user[0],  # Adicionando o user_id
                 'user_name': user[1],
                 'email': user[2],
                 'role': user[3]
