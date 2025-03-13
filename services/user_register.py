@@ -261,6 +261,7 @@ def get_user_by_email(email):
 
         if user:
             return {
+                'user_id': user[0],  # Adicionando o user_id
                 'user_name': user[1],
                 'email': user[2],
                 'role': user[3]
