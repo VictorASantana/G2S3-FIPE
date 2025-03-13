@@ -1,4 +1,6 @@
 from services.database_connection import create_connection, table_exists
+import streamlit as st
+import psycopg2
 
 def create_brand_table():
     if not table_exists("brand"):
@@ -25,13 +27,19 @@ def create_brand(name):
     conn = create_connection()
     cur = conn.cursor()
     
-    cur.execute("INSERT INTO brand (name) VALUES (%s) RETURNING id;", (name,))
-    brand_id = cur.fetchone()[0]
+    try: 
+        cur.execute("INSERT INTO brand (name) VALUES (%s) RETURNING id;", (name,))
+        brand_id = cur.fetchone()[0]
+        conn.commit()
+        st.success(f"Marca '{new_brand}' adicionada com sucesso!")
+        return brand_id
+    except psycopg2.Error as e:
+        st.error("Marca já existe") 
     
-    conn.commit()
-    cur.close()
-    conn.close()
-    return brand_id
+    finally:
+        cur.close()
+        conn.close()
+    #return brand_id
 
 def get_brands():
     conn = create_connection()
@@ -55,12 +63,16 @@ def update_brand(brand_id, new_name):
     conn = create_connection()
     cur = conn.cursor()
     
-    cur.execute("UPDATE brand SET name = %s WHERE id = %s;", (new_name, brand_id))
-    conn.commit()
-    
-    cur.close()
-    conn.close()
-    return f"Marca {brand_id} atualizada para {new_name} com sucesso."
+    try: 
+        cur.execute("UPDATE brand SET name = %s WHERE id = %s;", (new_name, brand_id))
+        conn.commit()
+        st.success(f"Marca atualizada para '{new_name}'!")
+    except psycopg2.Error as e:
+        st.error("Marca já existe") 
+    finally:
+        cur.close()
+        conn.close()
+    #return f"Marca {brand_id} atualizada para {new_name} com sucesso."
 
 def delete_brand(brand_id):
     conn = create_connection()
