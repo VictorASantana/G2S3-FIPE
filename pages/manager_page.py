@@ -1,7 +1,7 @@
 import streamlit as st
 import psycopg2
 from utils.auth import check_required_role
-from services.user_register import get_all_users, update_user, delete_user, create_user, get_all_researcher_info
+from services.user_register import get_all_users, update_user, delete_user, create_user, get_all_researcher_info, read_user
 from services.brand import get_brands, create_brand, update_brand, delete_brand
 from services.model import get_models_by_brand, create_model, update_model, delete_model
 from services.vehicles import create_vehicle, get_vehicles_by_model, update_vehicle, delete_vehicle
@@ -300,10 +300,11 @@ def gestor_panel():
         st.session_state["new_store_CNPJ"] = st.text_input("CNPJ", placeholder="Insira o CNPJ da loja")
         st.session_state["new_store_state"] = st.selectbox("Estado", st.session_state["states_tuple"], placeholder="Selecione um estado")
 
-        available_researchers_id = get_all_researcher_info(info="id")
+        available_researchers_id = get_all_researcher_info(info="id") 
         available_researchers_name = get_all_researcher_info(info="user_name")
         new_store_user_name = st.selectbox("Pesquisadores disponíveis", available_researchers_name, placeholder="Selecione um pesquisador")
         id_idx = available_researchers_name.index(new_store_user_name) 
+
         st.session_state["new_store_user_id"] = available_researchers_id[id_idx]
 
         confirm_creation_col, clear_creation_col = st.columns(2)
@@ -327,12 +328,17 @@ def gestor_panel():
         #st.header("Selecione uma loja")
         available_stores_ids = get_all_stores_info(info="id")
         available_researchers_ids = get_all_stores_info(info="user_id")
+        user_names_candidates = []
+        for id in available_researchers_ids:
+            user = read_user(int(id))
+            user_names_candidates.append(user["user_name"])
         available_stores_names = get_all_stores_info(info="name")
         available_stores_state = get_all_stores_info(info="state")
         available_stores_CNPJ = get_all_stores_info(info="CNPJ")
+        
         data = {
-            "Id": available_stores_ids,
-            "Id Pesquisador": available_researchers_ids,
+            "Id": available_stores_ids, 
+            "Id Pesquisador": user_names_candidates,
             "Nome": available_stores_names,
             "Estado": available_stores_state,
             "CNPJ": available_stores_CNPJ
