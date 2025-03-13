@@ -52,6 +52,8 @@ if "updated_store_state" not in st.session_state:
 
 if "new_brand_button_key" not in st.session_state:
     st.session_state["new_brand_button_key"] = 0
+if "new_model_button_key" not in st.session_state:
+    st.session_state["new_model_button_key"] = 0
 
 def gestor_panel():
     st.title("Painel do Gestor")
@@ -105,10 +107,15 @@ def gestor_panel():
         if selected_brand != "Selecione":
             brand_id = brand_options[selected_brand]
             
-            new_model = st.text_input("Nome do Novo Modelo")
+            new_model = st.text_input("Nome do Novo Modelo", key=st.session_state["new_model_button_key"])
             if st.button("Adicionar Modelo"):
-                create_model(brand_id, new_model)
-                st.success(f"Modelo '{new_model}' adicionado à marca '{selected_brand}'!")
+                if new_model != "":
+                    create_model(brand_id, new_model)
+                    st.session_state["new_model_button_key"] += 1
+                else:
+                    st.error(f"Campo novo nome não pode ser vazio!")
+                time.sleep(1)
+                st.rerun()
             
             models = get_models_by_brand(brand_id)
             model_options = {m[1]: m[0] for m in models}
@@ -117,12 +124,16 @@ def gestor_panel():
             if selected_model != "Selecione":
                 new_model_name = st.text_input("Novo Nome", selected_model)
                 if st.button("Atualizar Modelo"):
-                    update_model(model_options[selected_model], new_model_name)
-                    st.success(f"Modelo atualizado para '{new_model_name}'!")
+                    if new_model_name != "":
+                        update_model(model_options[selected_model], new_model_name)
+                    else:
+                        st.error(f"Campo novo nome não pode ser vazio!")
                 
                 if st.button("Excluir Modelo"):
                     delete_model(model_options[selected_model])
                     st.success(f"Modelo '{selected_model}' excluído com sucesso!")
+                    time.sleep(1)
+                    st.rerun()
     
     elif choice == "Gerenciar Veículos":
       st.header("Gerenciar Veículos")
