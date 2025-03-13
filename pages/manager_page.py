@@ -24,7 +24,7 @@ if "states_tuple" not in st.session_state:
                                         'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 
                                         'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO')
 if "new_store_name" not in st.session_state:
-    st.session_state["new_store_name"] = None
+    st.session_state["new_store_name"] = ""
 if "new_store_CNPJ" not in st.session_state:
     st.session_state["new_store_CNPJ"] = "12.345.678/0001-95"
 if "new_store_state" not in st.session_state:
@@ -32,6 +32,8 @@ if "new_store_state" not in st.session_state:
 if "new_store_user_id" not in st.session_state:
     st.session_state["new_store_user_id"] = None
 
+if "stores_available" not in st.session_state:
+    st.session_state["stores_available"] = None
 if "selected_store_id" not in st.session_state:
     st.session_state["selected_store_id"] = None
 if "selected_store_name" not in st.session_state:
@@ -50,6 +52,11 @@ if "updated_store_name" not in st.session_state:
 if "updated_store_state" not in st.session_state:
     st.session_state["updated_store_state"] = None
 
+if "new_brand_button_key" not in st.session_state:
+    st.session_state["new_brand_button_key"] = 0
+if "new_model_button_key" not in st.session_state:
+    st.session_state["new_model_button_key"] = 0
+
 def gestor_panel():
     st.title("Painel do Gestor")
     st.write(f"Bem vindo! {st.session_state['user_info'].get('name')}")
@@ -63,11 +70,16 @@ def gestor_panel():
     if choice == "Gerenciar Marcas":
         st.header("Gerenciar Marcas")
         
-        new_brand = st.text_input("Nome da Nova Marca")
+        new_brand = st.text_input("Nome da Nova Marca", key=st.session_state["new_brand_button_key"])
         if st.button("Adicionar Marca"):
-            create_brand(new_brand)
-            st.success(f"Marca '{new_brand}' adicionada com sucesso!")
-        
+            if new_brand != "": 
+                create_brand(new_brand)
+                st.session_state["new_brand_button_key"] += 1
+            else:
+                st.error(f"Campo nome não pode ser vazio!")
+            time.sleep(1)
+            st.rerun()
+
         brands = get_brands()
         brand_options = {b[1]: b[0] for b in brands}
         selected_brand = st.selectbox("Selecione uma marca para editar", ["Selecione"] + list(brand_options.keys()))
@@ -75,12 +87,17 @@ def gestor_panel():
         if selected_brand != "Selecione":
             new_name = st.text_input("Novo Nome", selected_brand)
             if st.button("Atualizar Marca"):
-                update_brand(brand_options[selected_brand], new_name)
-                st.success(f"Marca atualizada para '{new_name}'!")
+                if new_name != "": 
+                    update_brand(brand_options[selected_brand], new_name)
+                else:
+                    st.error(f"Campo novo nome não pode ser vazio!")
+                time.sleep(1)
+                st.rerun()
         
             if st.button("Excluir Marca"):
                 delete_brand(brand_options[selected_brand])
                 st.success(f"Marca '{selected_brand}' excluída com sucesso!")
+                st.rerun()
     
     elif choice == "Gerenciar Modelos":
         st.header("Gerenciar Modelos")
@@ -92,10 +109,15 @@ def gestor_panel():
         if selected_brand != "Selecione":
             brand_id = brand_options[selected_brand]
             
-            new_model = st.text_input("Nome do Novo Modelo")
+            new_model = st.text_input("Nome do Novo Modelo", key=st.session_state["new_model_button_key"])
             if st.button("Adicionar Modelo"):
-                create_model(brand_id, new_model)
-                st.success(f"Modelo '{new_model}' adicionado à marca '{selected_brand}'!")
+                if new_model != "":
+                    create_model(brand_id, new_model)
+                    st.session_state["new_model_button_key"] += 1
+                else:
+                    st.error(f"Campo novo nome não pode ser vazio!")
+                time.sleep(1)
+                st.rerun()
             
             models = get_models_by_brand(brand_id)
             model_options = {m[1]: m[0] for m in models}
@@ -104,12 +126,16 @@ def gestor_panel():
             if selected_model != "Selecione":
                 new_model_name = st.text_input("Novo Nome", selected_model)
                 if st.button("Atualizar Modelo"):
-                    update_model(model_options[selected_model], new_model_name)
-                    st.success(f"Modelo atualizado para '{new_model_name}'!")
+                    if new_model_name != "":
+                        update_model(model_options[selected_model], new_model_name)
+                    else:
+                        st.error(f"Campo novo nome não pode ser vazio!")
                 
                 if st.button("Excluir Modelo"):
                     delete_model(model_options[selected_model])
                     st.success(f"Modelo '{selected_model}' excluído com sucesso!")
+                    time.sleep(1)
+                    st.rerun()
     
     elif choice == "Gerenciar Veículos":
       st.header("Gerenciar Veículos")
@@ -249,6 +275,9 @@ def gestor_panel():
             if st.button("Excluir", key=f"delete_{row['id']}"):
               delete_user(row["id"])
               st.warning("Usuário excluído!")
+              time.sleep(1)
+              st.rerun()
+              
 
         if st.session_state.editing_user_id == row['id']:
           with st.form(f"form_edit_{row['id']}", clear_on_submit=False):
@@ -257,15 +286,18 @@ def gestor_panel():
             new_role = st.selectbox("Role", ["gestor", "pesquisador"])
             form_col1, form_col2 = st.columns(2)
             with form_col1:
-              if st.form_submit_button("Salvar", use_container_width=True):
-                update_user(row["id"], new_name, new_email, new_role)
-                st.success("Usuário atualizado!")
-                st.session_state.editing_user_id = None
-                st.rerun() 
+                if st.form_submit_button("Salvar", use_container_width=True):
+                    if new_name == "" or new_email == "":
+                        st.error("Preencha todos os campos!")
+                    else:
+                        update_user(row["id"], new_name, new_email, new_role)
+                    st.session_state.editing_user_id = None
+                    time.sleep(1)
+                    st.rerun() 
             with form_col2:
-              if st.form_submit_button("Cancelar", use_container_width=True):
-                st.session_state.editing_user_id = None
-                st.rerun() 
+                if st.form_submit_button("Cancelar", use_container_width=True):
+                    st.session_state.editing_user_id = None
+                    st.rerun() 
 
       st.divider()
 
@@ -280,11 +312,14 @@ def gestor_panel():
           new_role = st.selectbox("Role", ["pesquisador", "gestor"])
           form_col1, form_col2 = st.columns(2)
           with form_col1:
-            if st.form_submit_button("Criar", use_container_width=True):
-              create_user(new_name, new_email, new_role)
-              st.success("Usuário Criado com Sucesso!")
-              st.session_state.creating_user = False
-              st.rerun() 
+            if st.form_submit_button("Cadastrar", use_container_width=True):
+                if new_name == "" or new_email == "":
+                    st.error("Preencha todos os campos!")
+                else:
+                    create_user(new_name, new_email, new_role)
+                st.session_state.creating_user = False
+                time.sleep(1)
+                st.rerun() 
           with form_col2:
             if st.form_submit_button("Cancelar", use_container_width=True):
               st.session_state.creating_user = False
@@ -310,13 +345,18 @@ def gestor_panel():
         confirm_creation_col, clear_creation_col = st.columns(2)
         with confirm_creation_col:
           if st.button("Adicionar loja", use_container_width=True):
-              create_store(st.session_state["new_store_user_id"], 
-                          st.session_state["new_store_name"], 
-                          st.session_state["new_store_state"], 
-                          st.session_state["new_store_CNPJ"])
+            if st.session_state["new_store_name"] == "" or st.session_state["new_store_CNPJ"] == "":
+                st.error("Preencha todos os campos!")
+            else: 
+                create_store(st.session_state["new_store_user_id"], 
+                            st.session_state["new_store_name"], 
+                            st.session_state["new_store_state"], 
+                            st.session_state["new_store_CNPJ"])
+                time.sleep(1)
+                st.rerun()
         with clear_creation_col:
           if st.button("Limpar campos", use_container_width=True):
-              st.session_state["new_store_name"] = None
+              st.session_state["new_store_name"] = ""
               st.session_state["new_store_CNPJ"] = "12.345.678/0001-95"
               st.session_state["new_store_state"] = "AC"
               st.session_state["new_store_user_id"] = None
@@ -387,11 +427,13 @@ def gestor_panel():
         with update_col:
             update_button = st.button("Atualizar informações", use_container_width=True)
             if update_button and st.session_state["selected_store_id"] is not None:
+                print(st.session_state["selected_store_id"])
                 update_store(int(st.session_state["selected_store_id"]),
                             st.session_state["updated_store_user_id"], 
                             st.session_state["updated_store_name"], 
                             st.session_state["updated_store_state"]
                 )
+                time.sleep(1)
                 st.rerun()
             elif update_button:
                 st.write("Selecione uma loja!")
@@ -405,6 +447,8 @@ def gestor_panel():
             remove_store_button = st.button("Remover loja", use_container_width=True, key="remove_store_button")
             if remove_store_button and st.session_state["selected_store_id"] is not None:
                 delete_store(int(st.session_state["selected_store_id"]))
+                st.success("Loja excluída com sucesso!")
+                time.sleep(1)
                 st.rerun()
             elif remove_store_button:
                 st.write("Selecione uma loja!")

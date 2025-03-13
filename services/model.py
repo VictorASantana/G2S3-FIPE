@@ -1,4 +1,6 @@
 from services.database_connection import create_connection, table_exists
+import psycopg2
+import streamlit as st
 
 def create_model_table():
     if not table_exists("model"):
@@ -51,12 +53,17 @@ def create_model_table():
 def create_model(brand_id, name):
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO model (brand_id, name) VALUES (%s, %s) RETURNING id;", (brand_id, name))
-    model_id = cur.fetchone()[0]
-    conn.commit()
-    cur.close()
-    conn.close()
-    return model_id
+    try:
+        cur.execute("INSERT INTO model (brand_id, name) VALUES (%s, %s) RETURNING id;", (brand_id, name))
+        model_id = cur.fetchone()[0]
+        conn.commit()
+        st.success(f"Modelo '{name}' adicionado!") # à marca '{selected_brand}'!") 
+        return model_id
+    except psycopg2.Error as e:
+        st.error("Modelo já existe") 
+    finally:
+        cur.close()
+        conn.close()
 
 def get_models(brand_id):
     conn = create_connection()
@@ -79,13 +86,16 @@ def get_model_id_by_name(name):
 def update_model(model_id, new_name):
     conn = create_connection()
     cur = conn.cursor()
-    
-    cur.execute("UPDATE model SET name = %s WHERE id = %s;", (new_name, model_id))
-    conn.commit()
-    
-    cur.close()
-    conn.close()
-    return f"Modelo {model_id} atualizado para {new_name} com sucesso."
+    try:
+        cur.execute("UPDATE model SET name = %s WHERE id = %s;", (new_name, model_id))
+        conn.commit()
+        st.success(f"Modelo atualizada para '{new_name}'!")
+    except psycopg2.Error as e:
+        st.error("Modelo já existe") 
+    finally:
+        cur.close()
+        conn.close()
+    #return f"Modelo {model_id} atualizado para {new_name} com sucesso."
 
 def delete_model(model_id):
     conn = create_connection()
