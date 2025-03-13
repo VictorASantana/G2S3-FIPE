@@ -2,23 +2,11 @@ import os
 import streamlit as st
 from dotenv import load_dotenv
 from utils.auth import Authenticator
-from services.database_connection import create_connection
-from services.user_register import create_user_table
-from services.brand import create_brand_table
-from services.model import create_model_table
-from services.vehicles import create_vehicles_table
-from services.store import create_store_table
-from services.prices import create_prices_table
+from services.create_tables import create_all_tables
 
 load_dotenv()
 
-create_connection()
-create_user_table()
-create_brand_table()
-create_model_table()
-create_vehicles_table()
-create_store_table()
-create_prices_table()
+create_all_tables()
 
 allowed_users = os.getenv("ALLOWED_USERS").split(",")
 
