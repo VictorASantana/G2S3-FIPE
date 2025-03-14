@@ -88,7 +88,7 @@ with st.expander("Consulta de Preços", expanded=False):
             paintings = []
             for col_idx, _ in enumerate(row):
                 if row.name == len(df) - 1: #last row -> Preco medio
-                    paintings.append('background-color: blue; color: black;')
+                    paintings.append('background-color: #09727E; color: white;')
                 else:
                     if col_idx == 0:  
                         paintings.append('background-color: lightgreen; color: black;')
