@@ -20,8 +20,7 @@ time.sleep(0.1) # small timeout ensure config is applied
 
 # initialize session_state variables
 if "states_tuple" not in st.session_state:
-    st.session_state["states_tuple"] = ['Selecione',
-                                        'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 
+    st.session_state["states_tuple"] = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 
                                         'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 
                                         'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO']
 if "new_store_name" not in st.session_state:
@@ -84,11 +83,17 @@ if "selected_store_researcher_button_key" not in st.session_state:
 
 def gestor_panel():
     st.title("Painel do Gestor")
-    st.write(f"Bem vindo! {st.session_state['user_info'].get('name')}")
+    col_left, col_spacer, col_right = st.columns([1,6,1])
 
-    if st.button("Voltar"):
-      st.switch_page("main.py")
-    
+    with col_left:
+        st.write(f"Bem vindo! {st.session_state['user_info'].get('name')}")
+    with col_spacer:
+        pass
+    with col_right:
+        go_back = st.button("Voltar")
+        if go_back:
+            st.switch_page("main.py")
+            
     menu = ["Gerenciar Marcas", "Gerenciar Modelos", "Gerenciar Veículos", "Gerenciar Usuários", "Gerenciar Lojas"]
     choice = st.sidebar.selectbox("Escolha uma opção", menu)
     
@@ -309,7 +314,6 @@ def gestor_panel():
           with col5:
             if st.button("Excluir", key=f"delete_{row['id']}"):
               delete_user(row["id"])
-              st.warning("Usuário excluído!")
               time.sleep(1)
               st.rerun()
               
@@ -371,8 +375,7 @@ def gestor_panel():
         st.session_state["new_store_state"] = st.selectbox("Estado", st.session_state["states_tuple"], placeholder="Selecione um estado", key=f"new_store_uf_{st.session_state['new_store_uf_button_key']}")
 
         available_researchers_id = get_all_researcher_info(info="id")
-        available_researchers_name = ["Selecione"]
-        available_researchers_name += get_all_researcher_info(info="user_name")
+        available_researchers_name = get_all_researcher_info(info="user_name")
         new_store_user_name = st.selectbox("Pesquisadores disponíveis", available_researchers_name, placeholder="Selecione um pesquisador", key=f"new_store_researcher_{st.session_state['new_store_researcher_button_key']}")
         id_idx = available_researchers_name.index(new_store_user_name) 
 

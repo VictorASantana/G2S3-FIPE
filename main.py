@@ -34,8 +34,6 @@ with auth_col:
     with logout:
       if st.button("Log out", use_container_width=True):
         authenticator.logout()
-    st.divider()
-    st.write(f"Bem vindo! {st.session_state['user_info'].get('name')}")
 
   if authenticator.is_valid == False:
     st.write(f"Escolha um email autenticado! Caso seu email não seja válido, entre em contato com o administrador.")
@@ -44,5 +42,6 @@ with user_col:
   if st.button("Consultar preços", use_container_width=True):
       st.switch_page("pages/user_panel.py")
 
-# st.divider()
-# st.write(f"Bem vindo! {st.session_state['user_info'].get('name')}")
+if st.session_state["connected"]:
+  st.divider()
+  st.title(f"Bem vindo! {st.session_state['user_info'].get('name')}")
