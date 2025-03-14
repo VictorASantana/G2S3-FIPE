@@ -31,7 +31,7 @@ def create_brand(name):
         cur.execute("INSERT INTO brand (name) VALUES (%s) RETURNING id;", (name,))
         brand_id = cur.fetchone()[0]
         conn.commit()
-        st.success(f"Marca '{new_brand}' adicionada com sucesso!")
+        st.success(f"Marca '{name}' adicionada com sucesso!")
         return brand_id
     except psycopg2.Error as e:
         st.error("Marca já existe") 
