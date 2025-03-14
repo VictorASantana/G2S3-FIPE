@@ -12,6 +12,15 @@ check_required_role('pesquisador')
 
 def researcher_panel():
     st.title("Painel do Pesquisador")
+    col_left, col_spacer, col_right = st.columns([1,6,1])
+    with col_left:
+        st.write(f"Bem vindo! {st.session_state['user_info'].get('name')}")
+    with col_spacer:
+        pass
+    with col_right:
+        go_back = st.button("Voltar")
+        if go_back:
+            st.switch_page("main.py")
 
     user_id = get_logged_in_user_id()  # Obtém o ID do usuário logado
 
