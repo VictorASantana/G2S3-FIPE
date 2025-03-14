@@ -1,4 +1,5 @@
 import psycopg2
+import streamlit as st
 
 from services.database_connection import create_connection, table_exists
 
@@ -72,17 +73,37 @@ def update_vehicle(vehicle_id, model_id, fabrication_year, model_year):
     conn = create_connection()
     cur = conn.cursor()
     
-    cur.execute("""
-        UPDATE vehicles 
-        SET model_id = %s, fabrication_year = %s, model_year = %s
-        WHERE id = %s;
-    """, (model_id, fabrication_year, model_year, vehicle_id))
-    
-    conn.commit()
-    cur.close()
-    conn.close()
-    return f"Veículo {vehicle_id} atualizado com sucesso."
+    try:
+        cur.execute("""
+            SELECT id FROM vehicles
+            WHERE model_id = %s
+            AND fabrication_year = %s
+            AND model_year = %s;
+        """, (model_id, fabrication_year, model_year))
+        
+        existing_vehicle = cur.fetchone()
 
+        if existing_vehicle:
+            st.error("Erro: Já existe um veículo com esse ano de fabricação e modelo.")
+            return "Erro: Já existe um veículo com esse ano de fabricação e modelo."
+        
+        cur.execute("""
+            UPDATE vehicles
+            SET model_id = %s, fabrication_year = %s, model_year = %s
+            WHERE id = %s;
+        """, (model_id, fabrication_year, model_year, vehicle_id))
+        
+        conn.commit()
+        st.success("Veículo atualizado com sucesso!")
+        return f"Veículo {vehicle_id} atualizado com sucesso."
+
+    except psycopg2.Error as e:
+        return f"Erro ao inserir veículo: {e}"
+    
+    finally:
+        cur.close()
+        conn.close()
+    
 def delete_vehicle(vehicle_id):
     conn = create_connection()
     cur = conn.cursor()
