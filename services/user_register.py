@@ -20,7 +20,7 @@ def create_user_table():
         cur.execute("""
             CREATE TABLE users (
                 id SERIAL PRIMARY KEY,
-                user_name TEXT UNIQUE NOT NULL,
+                user_name TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
                 role user_role NOT NULL
             );
@@ -226,12 +226,12 @@ def delete_user(user_id):
         if existing_user:
             cursor.execute("DELETE FROM users WHERE id = %s;", (user_id,))
             conn.commit()
-            print("Usuário removido com sucesso!")
+            st.success("Usuário excluído com sucesso")
         else:
             print("Usuário não existe no banco de dados.")
 
     except psycopg2.Error as e:
-        print(f"Erro ao remover usuário {user_id}:\n{e}")
+        st.error(f"Erro ao deletar usuário: {e}")
     
     finally:
         cursor.close()
