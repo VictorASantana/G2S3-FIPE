@@ -112,3 +112,20 @@ def get_vehicle_ids_by_store_id(store_id):
     conn.close()
     
     return vehicle_ids
+
+def get_store_id_by_vehicle_id(store_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT DISTINCT store_id
+        FROM prices 
+        WHERE vehicle_id = %s;
+    """, (store_id,))
+    
+    store_ids = [row[0] for row in cursor.fetchall()]
+    
+    cursor.close()
+    conn.close()
+    
+    return store_ids
