@@ -96,7 +96,11 @@ def get_vehicle_monthly_avg(vehicle_id=None, year=None):
     conn = create_connection()
     cur = conn.cursor()
     try:
-        query = "SELECT * FROM vehicle_monthly_avg WHERE 1=1"
+        query = """
+        SELECT vehicle_id, month, year, avg_price 
+        FROM vehicle_monthly_avg 
+        WHERE 1=1
+        """
         params = []
 
         if vehicle_id:
@@ -109,6 +113,10 @@ def get_vehicle_monthly_avg(vehicle_id=None, year=None):
 
         cur.execute(query, tuple(params))
         records = cur.fetchall()
+
+        # Debug: Imprimir o que foi retornado
+        print(f"Records: {records}")
+
         return records
     except psycopg2.Error as e:
         print(f"Erro ao buscar registros: {e}")
