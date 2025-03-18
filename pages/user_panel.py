@@ -4,6 +4,7 @@ import os
 import datetime
 import pandas as pd
 import calendar
+import matplotlib.pyplot as plt
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from services.brand import get_brands, get_brand_id_by_name
@@ -32,11 +33,11 @@ if "compare_stores_end_year" not in st.session_state:
     st.session_state["compare_stores_end_year"] = None
 
 # Título da página
-st.title("Seleção de Veículo")
+st.title("Consulta de veículos")
 
 tabs = st.tabs([
-    "Consulta de Preços", "Comparação com dólar", "Comparar duas lojas", 
-    "Comparar dois veículos", "Diferença dois veículos", "Preços futuros", "Minhas consultas"
+    "Consulta de Preços", "P6 Comparação com dólar", "P7 Comparar duas lojas", 
+    "P8 Comparar dois veículos", "P9 Diferença dois veículos", "P10 Preços futuros", "Minhas consultas"
 ])
 
 with tabs[0]:
@@ -309,63 +310,80 @@ with tabs[3]:  # Aba "Comparar dois veículos"
     compare_button = st.button("Comparar veículos", use_container_width=True)
 
     if compare_button:
-        def generate_months(start_month, start_year, end_month, end_year):
-            months = []
-            current_month = start_month
-            current_year = start_year
+        if selected_vehicle1 == "Selecione um veículo" or selected_vehicle2 == "Selecione um veículo":
+            st.error("Você precisa selecionar ambos os veículos para comparar!")
+        else:
+            start_month_num = list(calendar.month_name).index(start_month)
+            end_month_num = list(calendar.month_name).index(end_month)
+            if (end_year < start_year) or (end_year == start_year and end_month_num < start_month_num):
+                st.error("A data final não pode ser anterior à data inicial!")
+            else:
+                def generate_months(start_month, start_year, end_month, end_year):
+                    months = []
+                    current_month = start_month
+                    current_year = start_year
 
-            while current_year < end_year or (current_year == end_year and current_month <= end_month):
-                months.append(f"{calendar.month_name[current_month]} {current_year}")
-                current_month += 1
-                if current_month > 12:
-                    current_month = 1
-                    current_year += 1
+                    while current_year < end_year or (current_year == end_year and current_month <= end_month):
+                        months.append((current_month, current_year))
+                        current_month += 1
+                        if current_month > 12:
+                            current_month = 1
+                            current_year += 1
 
-            return months
+                    return months
 
-        # Converter meses para números
-        start_month_num = list(calendar.month_name).index(start_month)
-        end_month_num = list(calendar.month_name).index(end_month)
+                # Converter meses para números
+                start_month_num = list(calendar.month_name).index(start_month)
+                end_month_num = list(calendar.month_name).index(end_month)
 
-        months = generate_months(start_month_num, start_year, end_month_num, end_year)
+                months_years = generate_months(start_month_num, start_year, end_month_num, end_year)
 
-        # Buscar os dados de preços médios mensais para os dois veículos no intervalo de datas
-        vehicle1_avg_prices = get_vehicle_monthly_avg(vehicle_id=vehicle_options1[selected_vehicle1], year=start_year)
-        vehicle2_avg_prices = get_vehicle_monthly_avg(vehicle_id=vehicle_options2[selected_vehicle2], year=start_year)
+                # Buscar os dados de preços médios mensais para os dois veículos no intervalo de datas
+                vehicle1_avg_prices = get_vehicle_monthly_avg(vehicle_id=vehicle_options1[selected_vehicle1])
+                vehicle2_avg_prices = get_vehicle_monthly_avg(vehicle_id=vehicle_options2[selected_vehicle2])
 
-        # Organizar os dados para exibição
-        data_vehicle1 = []
-        data_vehicle2 = []
+                data_vehicle1 = []
+                data_vehicle2 = []
 
-        # Ajuste aqui para garantir que estamos pegando as colunas corretamente
-        for month in months:
-            # Extrair o mês e ano do formato 'Mês Ano'
-            month_name, year = month.split()
-            month_num = list(calendar.month_name).index(month_name)
+                for month_num, year_num in months_years:
+                    vehicle1_data = next((item for item in vehicle1_avg_prices if item[1] == month_num and item[2] == year_num), None)
+                    vehicle2_data = next((item for item in vehicle2_avg_prices if item[1] == month_num and item[2] == year_num), None)
 
-            vehicle1_data = next((item for item in vehicle1_avg_prices if item[1] == month_num and item[2] == int(year)), None)
-            vehicle2_data = next((item for item in vehicle2_avg_prices if item[1] == month_num and item[2] == int(year)), None)
+                    # Adicionando os preços, ou None caso o dado não exista
+                    data_vehicle1.append(vehicle1_data[3] if vehicle1_data else None)
+                    data_vehicle2.append(vehicle2_data[3] if vehicle2_data else None)
 
-            data_vehicle1.append(vehicle1_data[3] if vehicle1_data else None)
-            data_vehicle2.append(vehicle2_data[3] if vehicle2_data else None)
+                df_comparison = pd.DataFrame({
+                    "Mês/Ano": [f"{calendar.month_name[m]} {y}" for m, y in months_years],
+                    f"{selected_model1} ({brand1})": data_vehicle1,
+                    f"{selected_model2} ({brand2})": data_vehicle2
+                })
 
-        df_comparison = pd.DataFrame({
-            "Mês/Ano": months,
-            f"{selected_model1} ({brand1})": data_vehicle1,
-            f"{selected_model2} ({brand2})": data_vehicle2
-        })
+                # Exibir os dados de comparação
+                col1, col2 = st.columns(2)
 
-        # Exibir os dados de comparação
-        col1, col2 = st.columns(2)
+                with col1:
+                    st.subheader(f"{brand1} {selected_model1} {selected_vehicle1} - Preço Médio Mês a Mês")
+                    st.dataframe(df_comparison[["Mês/Ano", f"{selected_model1} ({brand1})"]], use_container_width=True, hide_index=True)
 
-        with col1:
-            st.subheader(f"{selected_model1} ({brand1}) - Preço Médio Mês a Mês")
-            st.dataframe(df_comparison[[ "Mês/Ano", f"{selected_model1} ({brand1})"]], use_container_width=True, hide_index=True)
+                with col2:
+                    st.subheader(f"{brand2} {selected_model2} {selected_vehicle2} - Preço Médio Mês a Mês")
+                    st.dataframe(df_comparison[["Mês/Ano", f"{selected_model2} ({brand2})"]], use_container_width=True, hide_index=True)
+                
+                fig, ax = plt.subplots(figsize=(10, 5))
 
-        with col2:
-            st.subheader(f"{selected_model2} ({brand2}) - Preço Médio Mês a Mês")
-            st.dataframe(df_comparison[[ "Mês/Ano", f"{selected_model2} ({brand2})"]], use_container_width=True, hide_index=True)
+                ax.plot(df_comparison["Mês/Ano"], df_comparison[f"{selected_model1} ({brand1})"], marker='o', linestyle='-', label=f"{selected_model1} ({brand1})")
+                ax.plot(df_comparison["Mês/Ano"], df_comparison[f"{selected_model2} ({brand2})"], marker='s', linestyle='-', label=f"{selected_model2} ({brand2})")
 
+                ax.set_xlabel("Mês/Ano")
+                ax.set_ylabel("Preço Médio (R$)")
+                ax.set_title("Comparação de Preços Médios Mensais")
+                ax.legend()
+                ax.grid(True)
+                plt.xticks(rotation=45)  # Rotaciona os rótulos do eixo X para melhor legibilidade
+
+                # Exibir gráfico no Streamlit
+                st.pyplot(fig)
 
 with tabs[4]:
     st.write("Diferença entre dois veículos - Em construção")

@@ -97,29 +97,32 @@ def get_vehicle_monthly_avg(vehicle_id=None, year=None):
     cur = conn.cursor()
     try:
         query = """
-        SELECT vehicle_id, month, year, avg_price 
+        SELECT vehicle_id, 
+               CASE month 
+                    WHEN 'janeiro' THEN 1 WHEN 'fevereiro' THEN 2 WHEN 'março' THEN 3
+                    WHEN 'abril' THEN 4 WHEN 'maio' THEN 5 WHEN 'junho' THEN 6
+                    WHEN 'julho' THEN 7 WHEN 'agosto' THEN 8 WHEN 'setembro' THEN 9
+                    WHEN 'outubro' THEN 10 WHEN 'novembro' THEN 11 WHEN 'dezembro' THEN 12 
+               END AS month_num,
+               year, avg_price 
         FROM vehicle_monthly_avg 
         WHERE 1=1
         """
         params = []
-
         if vehicle_id:
             query += " AND vehicle_id = %s"
             params.append(vehicle_id)
-
         if year:
             query += " AND year = %s"
             params.append(year)
 
+        query += " ORDER BY year, month_num"
+
         cur.execute(query, tuple(params))
-        records = cur.fetchall()
-
-        # Debug: Imprimir o que foi retornado
-        print(f"Records: {records}")
-
-        return records
+        result = cur.fetchall()
+        return result
     except psycopg2.Error as e:
-        print(f"Erro ao buscar registros: {e}")
+        print(f"Erro ao buscar média mensal: {e}")
         return []
     finally:
         cur.close()
