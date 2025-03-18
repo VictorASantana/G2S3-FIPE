@@ -95,3 +95,20 @@ def get_prices_by_user(user_id):
     prices = cursor.fetchall()
     conn.close()
     return prices
+
+def get_vehicle_ids_by_store_id(store_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT DISTINCT vehicle_id 
+        FROM prices 
+        WHERE store_id = %s;
+    """, (store_id,))
+    
+    vehicle_ids = [row[0] for row in cursor.fetchall()]
+    
+    cursor.close()
+    conn.close()
+    
+    return vehicle_ids
