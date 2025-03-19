@@ -17,7 +17,7 @@ from services.stores_comparison import create_stores_comparison, get_avg_price_b
 from services.vehicle_monthly_query import create_vehicle_monthly_query
 from services.vehicle_monthly_query import get_queries_by_user
 
-from user_tabs.compare_stores_tab import run_compare_stores
+from user_tabs.compare_stores_tab import run_compare_stores, run_compare_stores_history
 
 st.set_page_config(layout="wide")
 
@@ -293,7 +293,7 @@ with tabs[6]:
         st.write("insira aqui a função que retorna as consultas salvas")
     
     with st.expander("Consulta de comparação entre duas lojas"):
-        st.write("insira aqui a função que retorna as consultas salvas")
+        run_compare_stores_history()
     
     with st.expander("Consulta de comparação entre dois veículos"):
         queries = get_queries_by_user(current_user_id)

@@ -235,7 +235,7 @@ def get_avg_price_by_month_given_vehicle_store(vehicle_id, store_id, start_month
                 7: 'julho', 8: 'agosto', 9: 'setembro', 10: 'outubro', 11: 'novembro', 12: 'dezembro'
             }.get(int(row[0]), 'Unknown')  
 
-            avg_prices[f"{month_name} {int(row[1])}"] = row[2]
+            avg_prices[f"{int(row[1])}/{month_name}"] = row[2]
             
         return avg_prices
 
@@ -243,6 +243,35 @@ def get_avg_price_by_month_given_vehicle_store(vehicle_id, store_id, start_month
         print(f"Erro ao calcular e armazenar preços médios mensais: {e}")
         return None
     finally:
-        # Close the cursor and connection
         cur.close()
+        conn.close()
+
+def get_all_comparisons():
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    try: 
+        cursor.execute("SELECT * FROM stores_comp")
+        comparisons = cursor.fetchall()
+        formatted_comparisons = []
+        for comparison in comparisons:
+            formatted_comparisons.append({
+                "id": comparison[0],
+                "user_email": comparison[1],
+                "Loja 1": comparison[2],
+                "Loja 2": comparison[3],
+                "Veículo": comparison[4],
+                "Mês Inicial": comparison[5],
+                "Ano Inicial": comparison[6],
+                "Mês Final": comparison[7],
+                "Ano Final": comparison[8],
+            })
+        return formatted_comparisons
+
+    except psycopg2.Error as e:
+        print(f"Erro ao buscar comparações: {e}")
+        return None
+
+    finally:
+        cursor.close()
         conn.close()
