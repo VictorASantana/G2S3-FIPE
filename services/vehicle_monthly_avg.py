@@ -128,6 +128,36 @@ def get_vehicle_monthly_avg(vehicle_id=None, year=None):
         cur.close()
         conn.close()
 
+
+def get_vehicle_avg_prices_between_dates(vehicle_id, start_year, start_month, end_year, end_month):
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            SELECT id, vehicle_id, month, year, avg_price 
+            FROM vehicle_monthly_avg
+            WHERE vehicle_id = %s
+            AND (year > %s OR (year = %s AND month >= %s::month_enum))
+            AND (year < %s OR (year = %s AND month <= %s::month_enum))
+            ORDER BY year, month;
+        """, (vehicle_id, start_year, start_year, start_month, end_year, end_year, end_month))
+
+        results = cursor.fetchall()
+
+        if not results:
+            print(f"Nenhum dado encontrado para o veículo {vehicle_id} no período especificado.")
+        
+        return results
+
+    except psycopg2.Error as e:
+        print(f"Erro ao buscar valores médios do veículo {vehicle_id}:\n{e}")
+
+    finally:
+        cursor.close()
+        conn.close()
+
+        
 def update_vehicle_monthly_avg(vehicle_id, month, year, new_avg_price):
     conn = create_connection()
     cur = conn.cursor()

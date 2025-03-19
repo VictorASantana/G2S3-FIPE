@@ -151,9 +151,8 @@ def get_dolar_values_between_dates(start_year, start_month, end_year, end_month)
 
         if not results:
             print("Nenhum dado encontrado para o período especificado.")
-        else:
-            for row in results:
-                print(row)
+        if results:
+            print(results)
 
         return results
 
