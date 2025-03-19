@@ -18,6 +18,7 @@ from services.vehicle_monthly_query import create_vehicle_monthly_query
 from services.vehicle_monthly_query import get_queries_by_user
 
 from user_tabs.compare_stores_tab import run_compare_stores
+from user_tabs.compare_dolar_tab import run_compare_dolar 
 
 st.set_page_config(layout="wide")
 
@@ -114,8 +115,7 @@ with tabs[0]:
             )
 
 with tabs[1]:
-    st.write("Comparação com o dólar - Em construção")
-
+    run_compare_dolar()
 with tabs[2]:
     run_compare_stores()
 
