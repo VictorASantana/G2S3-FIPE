@@ -208,7 +208,6 @@ def get_vehicle_details(vehicle_id):
     conn = create_connection()
     cur = conn.cursor()
     try:
-        # Consulta para obter os detalhes do veículo, incluindo o nome da marca e modelo
         cur.execute("""
             SELECT b.name AS brand, m.name AS model, v.model_year
             FROM vehicles v
@@ -218,9 +217,6 @@ def get_vehicle_details(vehicle_id):
         """, (vehicle_id,))
         
         vehicle = cur.fetchone()
-
-        # Adicionando print para depuração
-        print(f"Consulta para vehicle_id {vehicle_id}: {vehicle}")
 
         if vehicle:
             return {"brand": vehicle[0], "model": vehicle[1], "year": vehicle[2]}
