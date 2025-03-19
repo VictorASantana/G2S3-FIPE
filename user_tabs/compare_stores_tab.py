@@ -131,22 +131,22 @@ def run_compare_stores():
                 7: 'julho', 8: 'agosto', 9: 'setembro', 10: 'outubro', 11: 'novembro', 12: 'dezembro'
             }
         if first_store != "Selicone uma loja" and second_store != "Selicone uma loja":
-            create_stores_comparison("luccagamballi@gmail.com", 
-                                    st.session_state["compare_stores_first_store_id"], 
-                                    st.session_state["compare_stores_second_store_id"], 
-                                    st.session_state["compare_stores_vehicle_id"], 
-                                    int_to_month[st.session_state["compare_stores_start_month"]], 
-                                    st.session_state["compare_stores_start_year"],
-                                    int_to_month[st.session_state["compare_stores_end_month"]],
-                                    st.session_state["compare_stores_end_year"]
-                                )
+            if "user_info" in st.session_state:
+                create_stores_comparison(st.session_state["user_info"]["user_email"], 
+                                        st.session_state["compare_stores_first_store_id"], 
+                                        st.session_state["compare_stores_second_store_id"], 
+                                        st.session_state["compare_stores_vehicle_id"], 
+                                        int_to_month[st.session_state["compare_stores_start_month"]], 
+                                        st.session_state["compare_stores_start_year"],
+                                        int_to_month[st.session_state["compare_stores_end_month"]],
+                                        st.session_state["compare_stores_end_year"]
+                                    )
         else:
             st.error("Selecione duas lojas para comparar os preços!")
 
         first_store_avg = get_avg_price_by_month_given_vehicle_store(st.session_state["compare_stores_vehicle_id"], st.session_state["compare_stores_first_store_id"], int_to_month[st.session_state["compare_stores_start_month"]], st.session_state["compare_stores_start_year"], int_to_month[st.session_state["compare_stores_end_month"]], st.session_state["compare_stores_end_year"])
         second_store_avg = get_avg_price_by_month_given_vehicle_store(st.session_state["compare_stores_vehicle_id"], st.session_state["compare_stores_second_store_id"], int_to_month[st.session_state["compare_stores_start_month"]], st.session_state["compare_stores_start_year"], int_to_month[st.session_state["compare_stores_end_month"]], st.session_state["compare_stores_end_year"])
 
-        print(len(first_store_avg), len(second_store_avg))
         if len(first_store_avg) == 0 and len(second_store_avg) == 0:
             st.warning("Não há dados para nenhuma das lojas no período selecionado!")
         elif len(first_store_avg) == 0 and len(second_store_avg) > 0:
@@ -236,7 +236,7 @@ def run_compare_stores_history():
     with header5:
         styled_header_right("Data Final")
 
-    comparisons = get_all_comparisons()
+    comparisons = get_all_comparisons_by_email(st.session_state["user_info"]["user_email"])
     if comparisons:
         for comp in comparisons: 
             temp_vehicle_info = get_vehicle_details(comp["Veículo"])
