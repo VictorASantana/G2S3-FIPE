@@ -7,6 +7,7 @@ from services.vehicle_monthly_query import get_queries_by_user, delete_vehicle_m
 from services.vehicles import get_vehicles, get_avg_price, get_vehicle_details
 from user_tabs.compare_stores_tab import run_compare_stores_history
 from services.vehicle_monthly_avg import get_vehicle_monthly_avg
+from user_tabs.future_prices import interpolation_consult_history
 
 def run_my_queries():
     st.subheader("Minhas Consultas Salvas")
@@ -131,4 +132,4 @@ def run_my_queries():
         st.write("insira aqui a função que retorna as consultas salvas")
     
     with st.expander("Consulta de preços futuros"):
-        st.write("insira aqui a função que retorna as consultas salvas")
+        interpolation_consult_history(current_user_id)
