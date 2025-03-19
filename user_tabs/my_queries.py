@@ -7,6 +7,10 @@ from user_tabs.compare_stores_tab import run_compare_stores_history
 def run_my_queries():
     st.subheader("Minhas Consultas Salvas")
 
+    if "user_info" not in st.session_state or not st.session_state["user_info"]:
+        st.warning("Você precisa estar logado para visualizar suas consultas salvas.")
+        return
+
     current_user_id = st.session_state["user_info"]["user_id"]
     
     with st.expander("Consulta de comparação com dólar"):
