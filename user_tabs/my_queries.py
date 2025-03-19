@@ -7,10 +7,6 @@ from user_tabs.future_prices import interpolation_consult_history
 
 def run_my_queries():
     st.subheader("Minhas Consultas Salvas")
-    if "user_info" in st.session_state:
-        current_user_id = st.session_state["user_info"]["user_id"]
-    else:
-        current_user_id = None
 
     if "user_info" not in st.session_state or not st.session_state["user_info"]:
         st.warning("Você precisa estar logado para visualizar suas consultas salvas.")
