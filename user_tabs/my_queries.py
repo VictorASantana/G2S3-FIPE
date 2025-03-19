@@ -6,7 +6,7 @@ from services.vehicles import get_vehicles, get_avg_price, get_vehicle_details
 def run_my_queries():
     st.subheader("Minhas Consultas Salvas")
 
-    current_user_id = 1
+    current_user_id = st.session_state["user_info"]["user_id"]
     
     with st.expander("Consulta de comparação com dólar"):
         st.write("insira aqui a função que retorna as consultas salvas")
