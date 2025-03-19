@@ -30,10 +30,30 @@ def create_vehicle_monthly_query_table():
 if __name__ == "__main__":
     create_vehicle_monthly_query_table()
 
+MONTH_ENUM_MAPPING = {
+    1: 'janeiro',
+    2: 'fevereiro',
+    3: 'março',
+    4: 'abril',
+    5: 'maio',
+    6: 'junho',
+    7: 'julho',
+    8: 'agosto',
+    9: 'setembro',
+    10: 'outubro',
+    11: 'novembro',
+    12: 'dezembro'
+}
+
 def create_vehicle_monthly_query(query_data):
     conn = create_connection()
     cur = conn.cursor()
     try:
+        # Convertendo o mês numérico para o valor do enum correspondente
+        start_month_enum = MONTH_ENUM_MAPPING.get(query_data["start_month"])
+        end_month_enum = MONTH_ENUM_MAPPING.get(query_data["end_month"])
+
+        # Inserindo na tabela com os valores de mês convertidos para o tipo month_enum
         cur.execute(
             """
             INSERT INTO vehicle_monthly_query (
@@ -44,7 +64,7 @@ def create_vehicle_monthly_query(query_data):
             """,
             (
                 query_data["vehicle1_id"], query_data["vehicle2_id"], query_data["user_id"],
-                query_data["start_month"], query_data["end_month"],
+                start_month_enum, end_month_enum,
                 query_data["start_year"], query_data["end_year"]
             )
         )
