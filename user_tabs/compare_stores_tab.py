@@ -3,12 +3,12 @@ import datetime
 import pandas as pd
 import time
 
-from services.brand import get_brands, get_brand_id_by_name
-from services.model import get_models, get_model_id_by_name
-from services.vehicles import get_vehicles, get_avg_price, get_vehicle_details
+from services.brand import get_brands
+from services.model import get_models
+from services.vehicles import get_vehicles, get_vehicle_details
 from services.prices import get_store_id_by_vehicle_id
 from services.store import read_store, get_store_id_by_name
-from services.stores_comparison import create_stores_comparison, get_avg_price_by_month_given_vehicle_store, get_all_comparisons, delete_comparison
+from services.stores_comparison import create_stores_comparison, get_avg_price_by_month_given_vehicle_store, delete_comparison, get_all_comparisons_by_email
 
 if "compare_stores_first_store_id" not in st.session_state:
     st.session_state["compare_stores_first_store_id"] = None
@@ -132,7 +132,7 @@ def run_compare_stores():
             }
         if first_store != "Selicone uma loja" and second_store != "Selicone uma loja":
             if "user_info" in st.session_state:
-                create_stores_comparison(st.session_state["user_info"]["user_email"], 
+                create_stores_comparison(st.session_state["user_info"]["email"], 
                                         st.session_state["compare_stores_first_store_id"], 
                                         st.session_state["compare_stores_second_store_id"], 
                                         st.session_state["compare_stores_vehicle_id"], 
@@ -236,7 +236,7 @@ def run_compare_stores_history():
     with header5:
         styled_header_right("Data Final")
 
-    comparisons = get_all_comparisons_by_email(st.session_state["user_info"]["user_email"])
+    comparisons = get_all_comparisons_by_email(st.session_state["user_info"]["email"])
     if comparisons:
         for comp in comparisons: 
             temp_vehicle_info = get_vehicle_details(comp["Veículo"])
