@@ -9,6 +9,21 @@ from services.prices import get_store_id_by_vehicle_id
 from services.store import read_store, get_store_id_by_name
 from services.stores_comparison import create_stores_comparison, get_avg_price_by_month_given_vehicle_store
 
+if "compare_stores_first_store_id" not in st.session_state:
+    st.session_state["compare_stores_first_store_id"] = None
+if "second_store_id" not in st.session_state:
+    st.session_state["compare_stores_second_store_id"] = None
+if "compare_stores_vehicle_id" not in st.session_state:
+    st.session_state["compare_stores_vehicle_id"] = None
+if "compare_stores_start_month" not in st.session_state:
+    st.session_state["compare_stores_start_month"] = None
+if "compare_stores_start_year" not in st.session_state:
+    st.session_state["compare_stores_start_year"] = None
+if "compare_stores_end_month" not in st.session_state:
+    st.session_state["compare_stores_end_month"] = None
+if "compare_stores_end_year" not in st.session_state:
+    st.session_state["compare_stores_end_year"] = None
+
 def run_compare_stores():
     brands = get_brands()
     brand_options = {name: id for id, name in brands}
