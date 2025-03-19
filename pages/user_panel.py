@@ -20,7 +20,7 @@ from user_tabs.compare_dolar_tab import run_compare_dolar
 from user_tabs.compare_two_vehicles import run_two_vehicles_compare
 from user_tabs.my_queries import run_my_queries
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
 # Título da página
 st.title("Consulta de veículos")

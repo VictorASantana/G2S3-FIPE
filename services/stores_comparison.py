@@ -275,3 +275,33 @@ def get_all_comparisons():
     finally:
         cursor.close()
         conn.close()
+
+def get_all_comparisons_by_email(email):
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    try: 
+        cursor.execute("SELECT * FROM stores_comp WHERE user_email = %s", (email,))
+        comparisons = cursor.fetchall()
+        formatted_comparisons = []
+        for comparison in comparisons:
+            formatted_comparisons.append({
+                "id": comparison[0],
+                "user_email": comparison[1],
+                "Loja 1": comparison[2],
+                "Loja 2": comparison[3],
+                "Veículo": comparison[4],
+                "Mês Inicial": comparison[5],
+                "Ano Inicial": comparison[6],
+                "Mês Final": comparison[7],
+                "Ano Final": comparison[8],
+            })
+        return formatted_comparisons
+
+    except psycopg2.Error as e:
+        print(f"Erro ao buscar comparações: {e}")
+        return None
+
+    finally:
+        cursor.close()
+        conn.close()
