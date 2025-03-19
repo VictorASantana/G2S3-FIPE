@@ -13,7 +13,8 @@ from services.prices import get_store_id_by_vehicle_id
 from services.store import read_store, get_store_id_by_name
 from services.stores_comparison import create_stores_comparison, get_avg_price_by_month_given_vehicle_store
 from services.vehicle_monthly_query import get_queries_by_user
-from user_tabs.interpolation_consult import interpolation_consult
+from services.interpolation_query import get_interpolation_queries_by_user
+from user_tabs.future_prices import future_prices
 
 from user_tabs.compare_stores_tab import run_compare_stores, run_compare_stores_history
 from user_tabs.compare_dolar_tab import run_compare_dolar 
@@ -126,7 +127,7 @@ with tabs[4]:
     st.write("Diferença entre dois veículos - Em construção")
 
 with tabs[5]:
-    interpolation_consult()
+    future_prices()
 
 with tabs[6]:
     run_my_queries()

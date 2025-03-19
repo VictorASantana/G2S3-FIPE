@@ -3,9 +3,14 @@ import streamlit as st
 from services.vehicle_monthly_query import get_queries_by_user
 from services.vehicles import get_vehicles, get_avg_price, get_vehicle_details
 from user_tabs.compare_stores_tab import run_compare_stores_history
+from user_tabs.future_prices import interpolation_consult_history
 
 def run_my_queries():
     st.subheader("Minhas Consultas Salvas")
+    if "user_info" in st.session_state:
+        current_user_id = st.session_state["user_info"]["user_id"]
+    else:
+        current_user_id = None
 
     if "user_info" not in st.session_state or not st.session_state["user_info"]:
         st.warning("Você precisa estar logado para visualizar suas consultas salvas.")
@@ -47,4 +52,4 @@ def run_my_queries():
         st.write("insira aqui a função que retorna as consultas salvas")
     
     with st.expander("Consulta de preços futuros"):
-        st.write("insira aqui a função que retorna as consultas salvas")
+        interpolation_consult_history(current_user_id)
