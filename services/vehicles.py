@@ -177,3 +177,54 @@ def get_avg_price(model_id, model_year):
     finally:
         cursor.close()
         conn.close()  
+
+def get_all_vehicles_info(info="id"): 
+    """Retorna uma lista com todos os "info" dos veiculos."""
+    
+    info_list = ['id', 'model_id', 'fabrication_year', 'model_year', 'average_price']
+    try:
+        idx = info_list.index(info) 
+    except ValueError:
+        print(f"'{info}' not found in the vehicles table.")
+        return None
+
+    conn = create_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute(f"SELECT {info} FROM vehicles;")
+        vehicle_info = [row[0] for row in cursor.fetchall()]
+        return vehicle_info
+
+    except psycopg2.Error as e:
+        print(f"Erro ao buscar {info} dos vehicles: {e}")
+        return []
+
+    finally:
+        cursor.close()
+        conn.close()
+
+def get_vehicle_details(vehicle_id):
+    conn = create_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            SELECT b.name AS brand, m.name AS model, v.model_year
+            FROM vehicles v
+            JOIN model m ON v.model_id = m.id
+            JOIN brand b ON m.brand_id = b.id
+            WHERE v.id = %s;
+        """, (vehicle_id,))
+        
+        vehicle = cur.fetchone()
+
+        if vehicle:
+            return {"brand": vehicle[0], "model": vehicle[1], "year": vehicle[2]}
+        else:
+            return None
+    except psycopg2.Error as e:
+        print(f"Erro ao buscar detalhes do veículo: {e}")
+        return None
+    finally:
+        cur.close()
+        conn.close()

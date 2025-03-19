@@ -45,3 +45,27 @@ with user_col:
 if st.session_state["connected"]:
   st.divider()
   st.title(f"Bem vindo! {st.session_state['user_info'].get('name')}")
+
+# Add CSS for centering image and caption
+st.markdown("""
+    <style>
+        [data-testid="stImage"] {
+            text-align: center;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        [data-testid="stImage"] img {
+            max-width: 80%;
+            margin: auto;
+        }
+        
+        [data-testid="stImage"] div:nth-child(2) {
+            text-align: center;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# Display centered image
+st.image("images/institutominerva_cover.jpg")
