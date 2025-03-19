@@ -8,6 +8,8 @@ load_dotenv()
 
 create_all_tables()
 
+st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
+
 allowed_users = os.getenv("ALLOWED_USERS").split(",")
 
 authenticator = Authenticator(
