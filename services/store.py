@@ -34,7 +34,8 @@ def create_store_table():
         conn.close()
         print("Tabela 'store' criada com sucesso.")
     else: 
-        print("Tabela 'store' já existe.")
+        pass
+        #print("Tabela 'store' já existe.")
 
 def get_stores():
     conn = create_connection()
