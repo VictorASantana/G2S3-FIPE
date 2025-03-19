@@ -4,15 +4,18 @@ import os
 import datetime
 import pandas as pd
 import calendar
+import matplotlib.pyplot as plt
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from services.brand import get_brands, get_brand_id_by_name
 from services.model import get_models, get_model_id_by_name
-from services.vehicles import get_vehicles, get_avg_price
+from services.vehicles import get_vehicles, get_avg_price, get_vehicle_details
 from services.vehicle_monthly_avg import get_vehicle_monthly_avg
 from services.prices import get_store_id_by_vehicle_id
 from services.store import read_store, get_store_id_by_name
 from services.stores_comparison import create_stores_comparison, get_avg_price_by_month_given_vehicle_store
+from services.vehicle_monthly_query import create_vehicle_monthly_query
+from services.vehicle_monthly_query import get_queries_by_user
 
 st.set_page_config(layout="wide")
 
@@ -32,11 +35,11 @@ if "compare_stores_end_year" not in st.session_state:
     st.session_state["compare_stores_end_year"] = None
 
 # Título da página
-st.title("Seleção de Veículo")
+st.title("Consulta de veículos")
 
 tabs = st.tabs([
-    "Consulta de Preços", "Comparação com dólar", "Comparar duas lojas", 
-    "Comparar dois veículos", "Diferença dois veículos", "Preços futuros", "Minhas consultas"
+    "Consulta de Preços", "P6 Comparação com dólar", "P7 Comparar duas lojas", 
+    "P8 Comparar dois veículos", "P9 Diferença dois veículos", "P10 Preços futuros", "Minhas consultas"
 ])
 
 with tabs[0]:
@@ -127,8 +130,6 @@ with tabs[1]:
     st.write("Comparação com o dólar - Em construção")
 
 with tabs[2]:
-    st.write("Comparar duas lojas - Em construção")
-
     brands = get_brands()
     brand_options = {name: id for id, name in brands}
     selected_brand = st.selectbox("Selecione a Marca", ["Selecione uma marca"] + list(brand_options.keys()), label_visibility="visible", key="compare_brands_model")
@@ -226,13 +227,11 @@ with tabs[2]:
         st.line_chart(df, x="Meses", y=["Loja 1", "Loja 2"])
 
 
-with tabs[3]:  # Aba "Comparar dois veículos"
+with tabs[3]:
     st.header("Comparar dois veículos")
 
-    # Layout em duas colunas para os dois veículos
     col1, col2 = st.columns(2)
 
-    # Seleção do primeiro veículo (coluna 1)
     with col1:
         st.subheader("Veículo 1")
         brand1 = st.selectbox("Selecione a Marca", ["Selecione uma marca"] + list(brand_options.keys()), label_visibility="visible", key="brand1")
@@ -262,7 +261,6 @@ with tabs[3]:  # Aba "Comparar dois veículos"
 
         selected_vehicle1 = st.selectbox("Selecione o Veículo", ["Selecione um veículo"] + list(vehicle_options1.keys()), disabled=disable_vehicle1, label_visibility="visible", key="vehicle1")
 
-    # Seleção do segundo veículo (coluna 2)
     with col2:
         st.subheader("Veículo 2")
         brand2 = st.selectbox("Selecione a Marca", ["Selecione uma marca"] + list(brand_options.keys()), label_visibility="visible", key="brand2")
@@ -295,77 +293,98 @@ with tabs[3]:  # Aba "Comparar dois veículos"
 
     col3, col4 = st.columns(2)
 
-    # Mês e ano de início
     with col3:
         start_month = st.selectbox("Mês Inicial", list(calendar.month_name[1:]), label_visibility="visible")
         start_year = st.selectbox("Ano Inicial", list(range(2000, datetime.datetime.now().year + 1)), label_visibility="visible")
 
-    # Mês e ano de fim
     with col4:
         end_month = st.selectbox("Mês Final", list(calendar.month_name[1:]), label_visibility="visible")
         end_year = st.selectbox("Ano Final", list(range(2000, datetime.datetime.now().year + 1)), label_visibility="visible")
 
-    # Botão de comparação
     compare_button = st.button("Comparar veículos", use_container_width=True)
 
     if compare_button:
-        def generate_months(start_month, start_year, end_month, end_year):
-            months = []
-            current_month = start_month
-            current_year = start_year
+        if selected_vehicle1 == "Selecione um veículo" or selected_vehicle2 == "Selecione um veículo":
+            st.error("Você precisa selecionar ambos os veículos para comparar!")
+        else:
+            start_month_num = list(calendar.month_name).index(start_month)
+            end_month_num = list(calendar.month_name).index(end_month)
+            if (end_year < start_year) or (end_year == start_year and end_month_num < start_month_num):
+                st.error("A data final não pode ser anterior à data inicial!")
+            else:
+                def generate_months(start_month, start_year, end_month, end_year):
+                    months = []
+                    current_month = start_month
+                    current_year = start_year
 
-            while current_year < end_year or (current_year == end_year and current_month <= end_month):
-                months.append(f"{calendar.month_name[current_month]} {current_year}")
-                current_month += 1
-                if current_month > 12:
-                    current_month = 1
-                    current_year += 1
+                    while current_year < end_year or (current_year == end_year and current_month <= end_month):
+                        months.append((current_month, current_year))
+                        current_month += 1
+                        if current_month > 12:
+                            current_month = 1
+                            current_year += 1
 
-            return months
+                    return months
 
-        # Converter meses para números
-        start_month_num = list(calendar.month_name).index(start_month)
-        end_month_num = list(calendar.month_name).index(end_month)
+                start_month_num = list(calendar.month_name).index(start_month)
+                end_month_num = list(calendar.month_name).index(end_month)
 
-        months = generate_months(start_month_num, start_year, end_month_num, end_year)
+                months_years = generate_months(start_month_num, start_year, end_month_num, end_year)
 
-        # Buscar os dados de preços médios mensais para os dois veículos no intervalo de datas
-        vehicle1_avg_prices = get_vehicle_monthly_avg(vehicle_id=vehicle_options1[selected_vehicle1], year=start_year)
-        vehicle2_avg_prices = get_vehicle_monthly_avg(vehicle_id=vehicle_options2[selected_vehicle2], year=start_year)
+                vehicle1_avg_prices = get_vehicle_monthly_avg(vehicle_id=vehicle_options1[selected_vehicle1])
+                vehicle2_avg_prices = get_vehicle_monthly_avg(vehicle_id=vehicle_options2[selected_vehicle2])
 
-        # Organizar os dados para exibição
-        data_vehicle1 = []
-        data_vehicle2 = []
+                data_vehicle1 = []
+                data_vehicle2 = []
 
-        # Ajuste aqui para garantir que estamos pegando as colunas corretamente
-        for month in months:
-            # Extrair o mês e ano do formato 'Mês Ano'
-            month_name, year = month.split()
-            month_num = list(calendar.month_name).index(month_name)
+                for month_num, year_num in months_years:
+                    vehicle1_data = next((item for item in vehicle1_avg_prices if item[1] == month_num and item[2] == year_num), None)
+                    vehicle2_data = next((item for item in vehicle2_avg_prices if item[1] == month_num and item[2] == year_num), None)
 
-            vehicle1_data = next((item for item in vehicle1_avg_prices if item[1] == month_num and item[2] == int(year)), None)
-            vehicle2_data = next((item for item in vehicle2_avg_prices if item[1] == month_num and item[2] == int(year)), None)
+                    data_vehicle1.append(vehicle1_data[3] if vehicle1_data else None)
+                    data_vehicle2.append(vehicle2_data[3] if vehicle2_data else None)
 
-            data_vehicle1.append(vehicle1_data[3] if vehicle1_data else None)
-            data_vehicle2.append(vehicle2_data[3] if vehicle2_data else None)
+                df_comparison = pd.DataFrame({
+                    "Mês/Ano": [f"{calendar.month_name[m]} {y}" for m, y in months_years],
+                    f"{selected_model1} ({brand1})": data_vehicle1,
+                    f"{selected_model2} ({brand2})": data_vehicle2
+                })
 
-        df_comparison = pd.DataFrame({
-            "Mês/Ano": months,
-            f"{selected_model1} ({brand1})": data_vehicle1,
-            f"{selected_model2} ({brand2})": data_vehicle2
-        })
+                col1, col2 = st.columns(2)
 
-        # Exibir os dados de comparação
-        col1, col2 = st.columns(2)
+                with col1:
+                    st.subheader(f"{brand1} {selected_model1} {selected_vehicle1} - Preço Médio Mês a Mês")
+                    st.dataframe(df_comparison[["Mês/Ano", f"{selected_model1} ({brand1})"]], use_container_width=True, hide_index=True)
 
-        with col1:
-            st.subheader(f"{selected_model1} ({brand1}) - Preço Médio Mês a Mês")
-            st.dataframe(df_comparison[[ "Mês/Ano", f"{selected_model1} ({brand1})"]], use_container_width=True, hide_index=True)
+                with col2:
+                    st.subheader(f"{brand2} {selected_model2} {selected_vehicle2} - Preço Médio Mês a Mês")
+                    st.dataframe(df_comparison[["Mês/Ano", f"{selected_model2} ({brand2})"]], use_container_width=True, hide_index=True)
+                
+                fig, ax = plt.subplots(figsize=(10, 5))
 
-        with col2:
-            st.subheader(f"{selected_model2} ({brand2}) - Preço Médio Mês a Mês")
-            st.dataframe(df_comparison[[ "Mês/Ano", f"{selected_model2} ({brand2})"]], use_container_width=True, hide_index=True)
+                ax.plot(df_comparison["Mês/Ano"], df_comparison[f"{selected_model1} ({brand1})"], marker='o', linestyle='-', label=f"{selected_model1} ({brand1})")
+                ax.plot(df_comparison["Mês/Ano"], df_comparison[f"{selected_model2} ({brand2})"], marker='s', linestyle='-', label=f"{selected_model2} ({brand2})")
 
+                ax.set_xlabel("Mês/Ano")
+                ax.set_ylabel("Preço Médio (R$)")
+                ax.set_title("Comparação de Preços Médios Mensais")
+                ax.legend()
+                ax.grid(True)
+                plt.xticks(rotation=45)
+
+                st.pyplot(fig)
+
+                query_data = {
+                "vehicle1_id": vehicle_options1[selected_vehicle1],
+                "vehicle2_id": vehicle_options2[selected_vehicle2],
+                "user_id": 1,  #ID do usuário logado aqui
+                "start_month": start_month_num,
+                "end_month": end_month_num,
+                "start_year": start_year,
+                "end_year": end_year
+            }
+
+                query_id = create_vehicle_monthly_query(query_data)
 
 with tabs[4]:
     st.write("Diferença entre dois veículos - Em construção")
@@ -374,7 +393,45 @@ with tabs[5]:
     st.write("Preços futuros - Em construção")
 
 with tabs[6]:
-    st.write("Minhas consultas - Em construção")
+    st.subheader("Minhas Consultas Salvas")
+
+    current_user_id = 1
+    
+    with st.expander("Consulta de comparação com dólar"):
+        st.write("insira aqui a função que retorna as consultas salvas")
+    
+    with st.expander("Consulta de comparação entre duas lojas"):
+        st.write("insira aqui a função que retorna as consultas salvas")
+    
+    with st.expander("Consulta de comparação entre dois veículos"):
+        queries = get_queries_by_user(current_user_id)
+        
+        if queries:
+            for query in queries:
+                vehicle1 = get_vehicle_details(query[1])
+                vehicle2 = get_vehicle_details(query[2])
+                
+                query_date = query[8]
+
+                formatted_date = query_date.strftime('%d/%m/%Y %H:%M:%S')
+
+                st.subheader(f"Consulta realizada em {formatted_date}")
+
+                st.write(f"**Veículo 1**: {vehicle1['brand']} {vehicle1['model']} ({vehicle1['year']})")
+                st.write(f"**Veículo 2**: {vehicle2['brand']} {vehicle2['model']} ({vehicle2['year']})")
+                st.write(f"**Mês Inicial**: {query[4]} | **Ano Inicial**: {query[6]}")
+                st.write(f"**Mês Final**: {query[5]} | **Ano Final**: {query[6]}")
+    
+                st.write("---")
+
+        else:
+            st.write("Nenhuma consulta encontrada para este tipo.")
+    
+    with st.expander("Consulta de diferença entre dois veículos"):
+        st.write("insira aqui a função que retorna as consultas salvas")
+    
+    with st.expander("Consulta de preços futuros"):
+        st.write("insira aqui a função que retorna as consultas salvas")
 
 st.markdown("<hr style='border: 1px dashed black; width:100%; border-radius: 10px;'>", unsafe_allow_html=True)
 
