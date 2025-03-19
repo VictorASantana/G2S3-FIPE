@@ -202,3 +202,23 @@ def delete_store(store_id):
     finally:
         cursor.close()
         conn.close()
+
+def get_store_id_by_name(name):
+    conn = create_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            SELECT DISTINCT id
+            FROM store 
+            WHERE name = %s;
+        """, (name,))
+        
+        store_id = cursor.fetchone()[0]
+        return store_id
+    except: 
+        pass
+    finally:
+        cursor.close()
+        conn.close()
+    
