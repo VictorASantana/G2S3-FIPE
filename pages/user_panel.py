@@ -2,7 +2,7 @@ import streamlit as st
 import sys
 import os
 import datetime
-import pandas as pds
+import pandas as pd
 import calendar
 import matplotlib.pyplot as plt
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
