@@ -3,7 +3,7 @@ import streamlit as st
 import google_auth_oauthlib.flow
 from googleapiclient.discovery import build
 from utils.token_manager import AuthTokenManager
-from services.user_register import get_user_by_email
+from services.user_register import get_user_by_email, create_user
 
 class Authenticator:
   def __init__(
@@ -66,6 +66,13 @@ class Authenticator:
       st.query_params.clear()
       st.session_state["connected"] = True
       validate_user = get_user_by_email(token["email"])
+
+      if not validate_user:
+        email = token["email"]
+        user_name = email.split("@")[0]
+        create_user(user_name, email, role="usuario")
+        validate_user = get_user_by_email(email)
+
       st.session_state["user_info"] = {
           "email": token["email"],
           "oauth_id": token["oauth_id"],
@@ -89,6 +96,11 @@ class Authenticator:
       oauth_id = user_info.get("id")
       email = user_info.get("email")
       validate_user = get_user_by_email(email)
+
+      if not validate_user:
+            user_name = email.split("@")[0]
+            create_user(user_name, email, role="usuario")
+            validate_user = get_user_by_email(email)
 
       if email in self.allowed_users and validate_user:
         self.auth_token_manager.set_token(email, oauth_id)

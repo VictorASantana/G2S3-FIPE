@@ -164,7 +164,7 @@ def run_two_vehicles_compare():
                 query_data = {
                 "vehicle1_id": vehicle_options1[selected_vehicle1],
                 "vehicle2_id": vehicle_options2[selected_vehicle2],
-                "user_id": 1,  #ID do usuário logado aqui
+                "user_id": st.session_state["user_info"]["user_id"],
                 "start_month": start_month_num,
                 "end_month": end_month_num,
                 "start_year": start_year,
