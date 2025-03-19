@@ -3,13 +3,12 @@ import datetime
 import pandas as pd
 import time
 
-from services.brand import get_brands, get_brand_id_by_name
-from services.model import get_models, get_model_id_by_name
-from services.vehicles import get_vehicles, get_avg_price, get_vehicle_details
+from services.brand import get_brands
+from services.model import get_models
+from services.vehicles import get_vehicles, get_vehicle_details
 from services.prices import get_store_id_by_vehicle_id
-from services.user_register import read_user
 from services.store import read_store, get_store_id_by_name
-from services.stores_comparison import create_stores_comparison, get_avg_price_by_month_given_vehicle_store, get_all_comparisons, delete_comparison, get_all_comparisons_by_email
+from services.stores_comparison import create_stores_comparison, get_avg_price_by_month_given_vehicle_store, delete_comparison, get_all_comparisons_by_email
 
 if "compare_stores_first_store_id" not in st.session_state:
     st.session_state["compare_stores_first_store_id"] = None
