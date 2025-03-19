@@ -13,6 +13,7 @@ from services.prices import get_store_id_by_vehicle_id
 from services.store import read_store, get_store_id_by_name
 from services.stores_comparison import create_stores_comparison, get_avg_price_by_month_given_vehicle_store
 from services.vehicle_monthly_query import get_queries_by_user
+from user_tabs.interpolation_consult import interpolation_consult
 
 from user_tabs.compare_stores_tab import run_compare_stores, run_compare_stores_history
 from user_tabs.compare_dolar_tab import run_compare_dolar 
@@ -20,7 +21,7 @@ from user_tabs.compare_two_vehicles import run_two_vehicles_compare
 from user_tabs.my_queries import run_my_queries
 from user_tabs.graphic_query import run_graphic_query
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
 # Título da página
 st.title("Consulta de veículos")
@@ -126,7 +127,7 @@ with tabs[4]:
     run_graphic_query()
 
 with tabs[5]:
-    st.write("Preços futuros - Em construção")
+    interpolation_consult()
 
 with tabs[6]:
     run_my_queries()

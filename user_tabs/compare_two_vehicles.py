@@ -161,14 +161,15 @@ def run_two_vehicles_compare():
 
                 st.pyplot(fig)
 
-                query_data = {
-                "vehicle1_id": vehicle_options1[selected_vehicle1],
-                "vehicle2_id": vehicle_options2[selected_vehicle2],
-                "user_id": st.session_state["user_info"]["user_id"],
-                "start_month": start_month_num,
-                "end_month": end_month_num,
-                "start_year": start_year,
-                "end_year": end_year
-            }
+                if "user_info" in st.session_state:
+                    query_data = {
+                    "vehicle1_id": vehicle_options1[selected_vehicle1],
+                    "vehicle2_id": vehicle_options2[selected_vehicle2],
+                    "user_id": st.session_state["user_info"]["user_id"],
+                    "start_month": start_month_num,
+                    "end_month": end_month_num,
+                    "start_year": start_year,
+                    "end_year": end_year
+                }
 
-                query_id = create_vehicle_monthly_query(query_data)
+                    query_id = create_vehicle_monthly_query(query_data)

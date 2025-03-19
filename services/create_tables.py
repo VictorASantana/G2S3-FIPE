@@ -9,6 +9,7 @@ from services.price_changes import create_price_changes_table
 from services.monthly_dolar import create_monthly_dolar_table
 from services.vehicle_monthly_avg import create_vehicle_monthly_avg_table
 from services.vehicle_monthly_query import create_vehicle_monthly_query_table
+from services.stores_comparison import create_stores_comp_table
 
 def create_all_tables():
     create_connection()
@@ -23,6 +24,7 @@ def create_all_tables():
         create_monthly_dolar_table()
         create_vehicle_monthly_avg_table()
         create_vehicle_monthly_query_table()
+        create_stores_comp_table()
         print("Todas as tabelas foram criadas com sucesso.")
     except Exception as e:
         print(f"Erro ao criar tabelas: {e}")
