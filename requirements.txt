@@ -7,3 +7,5 @@ google-api-python-client==2.149.0
 python-dotenv==1.0.1
 matplotlib==3.10.1
 scipy==1.15.2
+webdriver-manager==4.0.2
+selenium==4.29.0

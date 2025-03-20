@@ -209,7 +209,7 @@ def get_vehicle_details(vehicle_id):
     cur = conn.cursor()
     try:
         cur.execute("""
-            SELECT b.name AS brand, m.name AS model, v.model_year
+            SELECT v.id, b.name AS brand, m.name AS model, v.model_year
             FROM vehicles v
             JOIN model m ON v.model_id = m.id
             JOIN brand b ON m.brand_id = b.id
@@ -219,7 +219,7 @@ def get_vehicle_details(vehicle_id):
         vehicle = cur.fetchone()
 
         if vehicle:
-            return {"brand": vehicle[0], "model": vehicle[1], "year": vehicle[2]}
+            return {"id": vehicle[0], "brand": vehicle[1], "model": vehicle[2], "year": vehicle[3]}
         else:
             return None
     except psycopg2.Error as e:
