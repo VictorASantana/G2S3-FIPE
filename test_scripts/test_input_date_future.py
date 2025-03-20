@@ -148,17 +148,27 @@ def main():
         elements[index].click()
 
         time.sleep(3)
+        
+        for _ in range(12):
+            # Go back one year
+            mont_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, "//button[contains(@aria-label, 'Previous month')]")
+                )
+            )
+            mont_button.click()
+            time.sleep(0.5)
 
         day_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable(
-                (By.XPATH, "//div[@role='gridcell' and contains(@aria-label, 'March 18th 2025')]")
+                (By.XPATH, "//div[@role='gridcell' and contains(@aria-label, 'March 18th 2024')]")
             )
         )
         day_button.click()
 
         time.sleep(3)
 
-        # Open the "Data final" container
+# Open the "Data final" container
         data_final_container = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable((By.XPATH, "(//div[@class='stDateInput' and contains(., 'Data final')])[1]"))
         )
@@ -174,6 +184,7 @@ def main():
         date_input.send_keys(Keys.CONTROL, "a")
         date_input.send_keys(Keys.DELETE)
         date_input.send_keys("2065/01/01")
+        time.sleep(1)
         date_input.send_keys(Keys.ENTER)
 
         time.sleep(5)
@@ -195,6 +206,22 @@ def main():
         day_button.click()
 
         time.sleep(3)
+
+        all_buttons = driver.find_elements(By.TAG_NAME, "button")
+
+        choosable_options = []
+        for option in all_buttons:
+            if option.text == "Comparar lojas":
+                choosable_options.append(option)
+        choosen_store = random.choice(choosable_options)
+        choosen_store.click()
+
+        time.sleep(5)
+        
+        body = driver.find_element(By.TAG_NAME, 'body')
+        body.send_keys(Keys.PAGE_DOWN)
+        
+        time.sleep(5)
 
     finally:
         driver.quit()

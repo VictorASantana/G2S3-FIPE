@@ -128,13 +128,14 @@ def run_compare_stores():
         try:
             if "select_end_date_key" not in st.session_state:
                 st.session_state["select_end_date_key"] = 1
+                end_date = date.today()
             end_date = st.date_input("Data final", min_value=start_date, max_value="today", disabled=disable_second_date, label_visibility="visible", key=st.session_state["select_end_date_key"])
             st.session_state["compare_stores_second_store_name"] = second_store
             st.session_state["compare_stores_second_store_id"] = second_store_id
             st.session_state["compare_stores_end_month"] = end_date.month
             st.session_state["compare_stores_end_year"] = end_date.year
         except:
-            end_date = date.today() - timedelta(days = 1)
+            end_date = date.today() 
             st.warning("Insira uma data válida!")
             st.session_state["select_end_date_key"] += 1
             time.sleep(1)

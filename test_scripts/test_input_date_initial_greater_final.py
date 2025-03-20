@@ -107,6 +107,8 @@ def main():
 
         time.sleep(3)
 
+        elements = driver.find_elements(By.XPATH, "//div[@class='stSelectbox' and contains(normalize-space(), 'Selecione uma loja')]")
+        text_to_find = f"Selecione uma loja\nSelecione uma loja"
         elements[1].click()
 
         time.sleep(3)
@@ -177,6 +179,22 @@ def main():
         day_button.click()
 
         time.sleep(3)
+
+        all_buttons = driver.find_elements(By.TAG_NAME, "button")
+
+        choosable_options = []
+        for option in all_buttons:
+            if option.text == "Comparar lojas":
+                choosable_options.append(option)
+        choosen_store = random.choice(choosable_options)
+        choosen_store.click()
+
+        time.sleep(5)
+        
+        body = driver.find_element(By.TAG_NAME, 'body')
+        body.send_keys(Keys.PAGE_DOWN)
+        
+        time.sleep(5)
 
     finally:
         driver.quit()

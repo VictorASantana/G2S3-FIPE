@@ -12,11 +12,12 @@ def main():
 
     try:
         # Click "Entrar com Google" button
-        google_login_button = wait.until(
-            EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'google')]"))
+        google_button = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, "//a[contains(text(), 'Entre com google')]"))
         )
-        google_login_button.click()
+        google_button.click()
 
+        time.sleep(3)
         # # Wait for new window (Google Login popup)
         # time.sleep(2)  # Small delay to allow window switch
 
