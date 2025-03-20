@@ -1,6 +1,6 @@
 import streamlit as st
 import datetime
-from datetime import date
+from datetime import date, timedelta
 import pandas as pd
 import time
 
@@ -39,6 +39,11 @@ if "show_results" not in st.session_state:
     st.session_state["show_results"] = None
 if "clear_results" not in st.session_state:
     st.session_state["clear_results"] = None
+
+if "select_start_date_key" not in st.session_state:
+    st.session_state["select_start_date_key"] = "first_date_key"
+if "select_end_date_key" not in st.session_state:
+    st.session_state["select_end_date_key"] = "second_date_key"
 
 def build_graph(first_store_name, first_store_avg, second_store_name, second_store_avg):
 
@@ -107,20 +112,34 @@ def run_compare_stores():
         first_store = st.selectbox("Selecione uma loja", ["Selecione uma loja"] + list(store_options.keys()), disabled=disable_store, label_visibility="visible", key="selected_first_store")
         first_store_id = get_store_id_by_name(first_store)
         disable_first_date = first_store == "Selecione uma loja"
-        start_date = st.date_input("Data inicial", max_value="today", disabled=disable_first_date, label_visibility="visible", key="selected_start_date")
-        st.session_state["compare_stores_first_store_name"] = first_store
-        st.session_state["compare_stores_first_store_id"] = first_store_id
-        st.session_state["compare_stores_start_month"] = start_date.month
-        st.session_state["compare_stores_start_year"] = start_date.year
+        try:
+            start_date = st.date_input("Data inicial", max_value="today", disabled=disable_first_date, label_visibility="visible", key=st.session_state["select_start_date_key"])
+            st.session_state["compare_stores_first_store_name"] = first_store
+            st.session_state["compare_stores_first_store_id"] = first_store_id
+            st.session_state["compare_stores_start_month"] = start_date.month
+            st.session_state["compare_stores_start_year"] = start_date.year
+        except:
+            start_date = date.today() - timedelta(days = 1)
+            st.warning("Insira uma data válida!")
+            st.session_state["select_start_date_key"] += "1"
+            time.sleep(1)
+            st.rerun()
     with col_loja2:
         disable_second_date = start_date == date.today()
         second_store = st.selectbox("Selecione uma loja", ["Selecione uma loja"] + list(store_options.keys()), disabled=disable_store, label_visibility="visible", key="selected_second_store")
         second_store_id = get_store_id_by_name(second_store)
-        end_date = st.date_input("Data final", min_value=start_date, max_value="today", disabled=disable_second_date, label_visibility="visible", key="selected_end_date")
-        st.session_state["compare_stores_second_store_name"] = second_store
-        st.session_state["compare_stores_second_store_id"] = second_store_id
-        st.session_state["compare_stores_end_month"] = end_date.month
-        st.session_state["compare_stores_end_year"] = end_date.year
+        try:
+            end_date = st.date_input("Data final", min_value=start_date, max_value="today", disabled=disable_second_date, label_visibility="visible", key="selected_end_date")
+            st.session_state["compare_stores_second_store_name"] = second_store
+            st.session_state["compare_stores_second_store_id"] = second_store_id
+            st.session_state["compare_stores_end_month"] = end_date.month
+            st.session_state["compare_stores_end_year"] = end_date.year
+        except:
+            end_date = date.today() - timedelta(days = 1)
+            st.warning("Insira uma data válida!")
+            st.session_state["select_end_date_key"] += "1"
+            time.sleep(1)
+            st.rerun()
 
     if st.session_state["compare_stores_first_store_name"] == "Selecione uma loja" or st.session_state["compare_stores_second_store_name"] == "Selecione uma loja":
         st.session_state["disable_confirm_button"] = True
