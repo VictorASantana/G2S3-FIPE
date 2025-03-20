@@ -127,7 +127,7 @@ def run_compare_stores():
         second_store_id = get_store_id_by_name(second_store)
         try:
             if "select_end_date_key" not in st.session_state:
-                st.session_state["select_end_date_key"] = "second_date_key"
+                st.session_state["select_end_date_key"] = 1
             end_date = st.date_input("Data final", min_value=start_date, max_value="today", disabled=disable_second_date, label_visibility="visible", key=st.session_state["select_end_date_key"])
             st.session_state["compare_stores_second_store_name"] = second_store
             st.session_state["compare_stores_second_store_id"] = second_store_id
