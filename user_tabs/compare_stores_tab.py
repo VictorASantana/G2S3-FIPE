@@ -1,5 +1,6 @@
 import streamlit as st
 import datetime
+from datetime import date
 import pandas as pd
 import time
 
@@ -103,17 +104,19 @@ def run_compare_stores():
 
     col_loja1, col_loja2 = st.columns(2)
     with col_loja1: 
-        first_store = st.selectbox("Selicone uma loja", ["Selecione uma loja"] + list(store_options.keys()), disabled=disable_store, label_visibility="visible", key="selected_first_store")
+        first_store = st.selectbox("Selecione uma loja", ["Selecione uma loja"] + list(store_options.keys()), disabled=disable_store, label_visibility="visible", key="selected_first_store")
         first_store_id = get_store_id_by_name(first_store)
-        start_date = st.date_input("Data inicial", max_value="today", disabled=disable_store, label_visibility="visible", key="selected_start_date")
+        disable_first_date = first_store == "Selecione uma loja"
+        start_date = st.date_input("Data inicial", max_value="today", disabled=disable_first_date, label_visibility="visible", key="selected_start_date")
         st.session_state["compare_stores_first_store_name"] = first_store
         st.session_state["compare_stores_first_store_id"] = first_store_id
         st.session_state["compare_stores_start_month"] = start_date.month
         st.session_state["compare_stores_start_year"] = start_date.year
-    with col_loja2: 
+    with col_loja2:
+        disable_second_date = start_date == date.today()
         second_store = st.selectbox("Selecione uma loja", ["Selecione uma loja"] + list(store_options.keys()), disabled=disable_store, label_visibility="visible", key="selected_second_store")
         second_store_id = get_store_id_by_name(second_store)
-        end_date = st.date_input("Data final", max_value="today", disabled=disable_store, label_visibility="visible", key="selected_end_date")
+        end_date = st.date_input("Data final", min_value=start_date, max_value="today", disabled=disable_second_date, label_visibility="visible", key="selected_end_date")
         st.session_state["compare_stores_second_store_name"] = second_store
         st.session_state["compare_stores_second_store_id"] = second_store_id
         st.session_state["compare_stores_end_month"] = end_date.month
