@@ -13,7 +13,7 @@ check_required_role('gestor')
 
 st.set_page_config(
     page_title="Painel do Gestor",
-    layout="wide"
+    layout="wide",
     initial_sidebar_state="collapsed"
 )
 
