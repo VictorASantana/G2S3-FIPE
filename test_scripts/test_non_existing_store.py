@@ -107,11 +107,10 @@ def main():
         time.sleep(3)
 
         elements = driver.find_elements(By.XPATH, "//div[@class='stSelectbox' and contains(normalize-space(), 'Selecione uma loja')]")
-        # print("Found buttons:", [e.text for e in elements])
         text_to_find = f"Selecione uma loja"
-        index = [e.text for e in elements].index(text_to_find)
-        elements[1].click()
-        elements[1].click()
+        index = [e.text for e in elements].index("Selecione uma loja")
+        elements[index].click()
+        elements[index].click()
 
         time.sleep(3)
 
