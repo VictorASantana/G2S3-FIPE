@@ -16,6 +16,8 @@ def main():
         # Open the Streamlit app
         driver.get("http://localhost:8501")
 
+        time.sleep(3)
+
         # Click "Consultar preços" button
         consultar_precos_button = wait.until(
             EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Consultar preços')]"))
