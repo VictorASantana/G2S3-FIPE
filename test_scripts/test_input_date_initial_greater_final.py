@@ -131,10 +131,20 @@ def main():
         elements[index].click()
 
         time.sleep(3)
+        
+        for _ in range(12):
+            # Go back one year
+            mont_button = WebDriverWait(driver, 10).until(
+                EC.element_to_be_clickable(
+                    (By.XPATH, "//button[contains(@aria-label, 'Previous month')]")
+                )
+            )
+            mont_button.click()
+            time.sleep(0.5)
 
         day_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable(
-                (By.XPATH, "//div[@role='gridcell' and contains(@aria-label, 'March 18th 2025')]")
+                (By.XPATH, "//div[@role='gridcell' and contains(@aria-label, 'March 18th 2024')]")
             )
         )
         day_button.click()
