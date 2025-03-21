@@ -161,7 +161,7 @@ def main():
 
         day_button = WebDriverWait(driver, 10).until(
             EC.element_to_be_clickable(
-                (By.XPATH, "//div[@role='gridcell' and contains(@aria-label, 'March 18th 2024')]")
+                (By.XPATH, "//div[@role='gridcell' and contains(@aria-label, 'December 18th 2024')]")
             )
         )
         day_button.click()
