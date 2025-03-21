@@ -5,8 +5,9 @@ from scipy.stats import linregress
 from datetime import timedelta
 import pandas as pd
 from dateutil.relativedelta import relativedelta
+from services.interpolation_query import insert_interpolation_query
 
-def exponential_interpolation(data):
+def exponential_interpolation(data, user_id, vehicle_id):
   # Sort data by date
   data_sorted = sorted(data, key=lambda x: x['date'])
   
@@ -62,6 +63,14 @@ def exponential_interpolation(data):
   ax.xaxis.set_major_formatter(plt.matplotlib.dates.DateFormatter('%b-%Y'))
   
   st.pyplot(fig)
+
+  if user_id and vehicle_id:
+    insert_interpolation_query({
+      'a': a,
+      'b': b,
+      'vehicle_id': vehicle_id,
+      'user_id': user_id
+    })
 
   formatted_future_values = []
   for value in future_values:
