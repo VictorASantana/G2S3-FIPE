@@ -132,7 +132,7 @@ def main():
 
         time.sleep(3)
         
-        for _ in range(12):
+        for _ in range(3):
             # Go back one year
             mont_button = WebDriverWait(driver, 10).until(
                 EC.element_to_be_clickable(
