@@ -323,7 +323,7 @@ def main():
         )
         delete_button.click()
         
-        time.sleep(5)
+        time.sleep(10)
 
     finally:
         driver.quit()
