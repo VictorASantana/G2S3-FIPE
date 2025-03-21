@@ -11,6 +11,8 @@ def main():
         # Open the Streamlit app
         driver.get("http://localhost:8501")
 
+        time.sleep(5)
+
         # Wait for the "Consultar preços" button and click it
         wait = WebDriverWait(driver, 10)
         consultar_precos_button = wait.until(
