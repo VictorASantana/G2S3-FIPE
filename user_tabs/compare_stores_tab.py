@@ -60,6 +60,7 @@ def build_graph(first_store_name, first_store_avg, second_store_name, second_sto
     st.line_chart(df, x="Meses", y=[first_store_name, second_store_name])
 
 def run_compare_stores():
+    
     brands = get_brands()
     brand_options = {name: id for id, name in brands}
     selected_brand = st.selectbox("Selecione a Marca", ["Selecione uma marca"] + list(brand_options.keys()), label_visibility="visible", key="compare_brands_model")
@@ -136,7 +137,8 @@ def run_compare_stores():
             st.session_state["compare_stores_end_year"] = end_date.year
         except:
             end_date = date.today() 
-            st.warning("Insira uma data válida!")
+            if st.session_state["select_end_date_key"] > 1:
+                st.warning("Insira uma data válida!")
             st.session_state["select_end_date_key"] += 1
             time.sleep(1)
             st.rerun()
