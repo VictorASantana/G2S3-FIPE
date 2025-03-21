@@ -309,21 +309,21 @@ def main():
         )
         results_button.click()
 
-        time.sleep(3)
+        time.sleep(5)
 
         clear_button = wait.until(
             EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Limpar')]"))
         )
         clear_button.click()
         
-        time.sleep(3)
+        time.sleep(5)
 
         delete_button = wait.until(
             EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Excluir')]"))
         )
         delete_button.click()
         
-        time.sleep(3)
+        time.sleep(5)
 
     finally:
         driver.quit()
