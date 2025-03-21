@@ -82,3 +82,8 @@ def exponential_interpolation(data, user_id, vehicle_id):
       "Valor Projetado": formatted_future_values
   }
   st.dataframe(pd.DataFrame(projection_data))
+
+  return {
+    "a": a,
+    "b": b
+  }
