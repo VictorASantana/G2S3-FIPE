@@ -176,13 +176,30 @@ def run_graphic_query():
 
                     # Plotar a diferença de preço
                     ax.plot(df_comparison["Mês/Ano"], df_comparison["Diferença de Preço (R$)"], marker='o', linestyle='-', color='red', label="Diferença de Preço (R$)")
+# Configurações do gráfico
+ax.set_xlabel("Mês/Ano")
+ax.set_ylabel("Preço (R$)")
+ax.set_title("Comparação de Preços Mensais")
+ax.legend()
+ax.grid(True)
+plt.xticks(rotation=45)
 
-                    # Configurações do gráfico
-                    ax.set_xlabel("Mês/Ano")
-                    ax.set_ylabel("Preço (R$)")
-                    ax.set_title("Comparação de Preços Mensais")
-                    ax.legend()
-                    ax.grid(True)
-                    plt.xticks(rotation=45)
+st.pyplot(fig)
 
-                    st.pyplot(fig)
+# Salvar a consulta no banco de dados
+if "user_info" in st.session_state:
+    query_data = {
+        "vehicle_id": vehicle_options1[selected_vehicle1],
+        "vehicle_id": vehicle_options2[selected_vehicle2],
+        "user_id": st.session_state["user_info"]["user_id"],
+        "start_month": start_month_num,
+        "end_month": end_month_num,
+        "start_year": start_year,
+        "end_year": end_year
+    }
+
+    try:
+        query_id = create_vehicle_monthly_query(query_data)
+        st.success("Consulta salva com sucesso!")
+    except Exception as e:
+        st.error(f"Erro ao salvar a consulta: {e}")
