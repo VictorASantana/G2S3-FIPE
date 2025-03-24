@@ -8,6 +8,7 @@ from services.brand import get_brands
 from services.model import get_models
 from services.vehicles import get_vehicles
 from services.vehicle_monthly_avg import get_vehicle_monthly_avg
+from services.vehicle_monthly_query import create_vehicle_monthly_query  # Importar a função de salvamento
 
 def run_graphic_query():
     st.header("Consulta Gráfica de Veículos")
@@ -186,3 +187,21 @@ def run_graphic_query():
                     plt.xticks(rotation=45)
 
                     st.pyplot(fig)
+
+                # Salvar a consulta no banco de dados
+                if "user_info" in st.session_state:
+                    query_data = {
+                        "vehicle1_id": vehicle_options1[selected_vehicle1],
+                        "vehicle2_id": vehicle_options2[selected_vehicle2],
+                        "user_id": st.session_state["user_info"]["user_id"],
+                        "start_month": start_month_num,
+                        "end_month": end_month_num,
+                        "start_year": start_year,
+                        "end_year": end_year
+                    }
+
+                    try:
+                        query_id = create_vehicle_monthly_query(query_data)
+                        st.success("Consulta salva com sucesso!")
+                    except Exception as e:
+                        st.error(f"Erro ao salvar a consulta: {e}")
